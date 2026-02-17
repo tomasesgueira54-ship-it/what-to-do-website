@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FaPlay, FaPause, FaClock } from "react-icons/fa";
 import { useAudio } from "@/context/AudioContext";
 
@@ -40,6 +41,9 @@ export default function EpisodeCard({
 
   const isCurrent = currentEpisode?.id === episode.id;
   const isActuallyPlaying = isCurrent && isPlaying;
+  const imageSrc = episode.imageUrl?.startsWith("/images/")
+    ? "/images/placeholder-card.svg"
+    : episode.imageUrl;
 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -52,27 +56,22 @@ export default function EpisodeCard({
 
   return (
     <div className="card group cursor-pointer relative">
-      <Link href={`/${locale}/episodes/${episode.id}`}>
+      <Link href={`/${locale}/episodes/${episode.id}`} className="block">
         <div className="relative h-48 overflow-hidden">
+          {imageSrc && (
+            <Image
+              src={imageSrc}
+              alt={episode.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          )}
           <div className="absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all" />
           <div className="gradient-overlay" />
           <div className="absolute bottom-4 left-4 flex items-center space-x-2 text-sm z-10">
             <FaClock className="text-brand-red" />
             <span>{episode.duration || labels.minutesFallback}</span>
-          </div>
-
-          {/* Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center z-20">
-            <button
-              onClick={handlePlay}
-              className={`bg-brand-red rounded-full p-4 transition-all duration-300 transform hover:scale-110 hover:bg-brand-red-light focus:outline-none ${isActuallyPlaying ? "opacity-100 scale-100" : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"}`}
-            >
-              {isActuallyPlaying ? (
-                <FaPause className="text-2xl text-white" />
-              ) : (
-                <FaPlay className="text-2xl text-white ml-1" />
-              )}
-            </button>
           </div>
         </div>
 
@@ -91,6 +90,28 @@ export default function EpisodeCard({
           <p className="text-brand-grey line-clamp-2">{episode.description}</p>
         </div>
       </Link>
+
+      <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+        <button
+          onClick={handlePlay}
+          aria-label={
+            isActuallyPlaying
+              ? locale === "pt"
+                ? "Pausar episódio"
+                : "Pause episode"
+              : locale === "pt"
+                ? "Reproduzir episódio"
+                : "Play episode"
+          }
+          className={`pointer-events-auto bg-brand-red rounded-full p-4 transition-all duration-300 transform hover:scale-110 hover:bg-brand-red-light focus:outline-none ${isActuallyPlaying ? "opacity-100 scale-100" : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"}`}
+        >
+          {isActuallyPlaying ? (
+            <FaPause className="text-2xl text-white" />
+          ) : (
+            <FaPlay className="text-2xl text-white ml-1" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

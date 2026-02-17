@@ -89,9 +89,17 @@ export default function EpisodePage() {
               <AudioPlayer episode={episode} />
             </div>
 
-            <div className="flex border-b border-brand-grey/20 mb-8 space-x-8">
+            <div
+              className="flex border-b border-brand-grey/20 mb-8 space-x-8"
+              role="tablist"
+              aria-label={isPt ? "Conteúdo do episódio" : "Episode content"}
+            >
               <button
                 onClick={() => setActiveTab("shownotes")}
+                role="tab"
+                id="tab-shownotes"
+                aria-controls="panel-shownotes"
+                aria-selected={activeTab === "shownotes"}
                 className={`pb-4 px-2 font-semibold text-lg flex items-center gap-2 transition-colors relative ${
                   activeTab === "shownotes"
                     ? "text-brand-red border-b-2 border-brand-red"
@@ -104,6 +112,10 @@ export default function EpisodePage() {
 
               <button
                 onClick={() => setActiveTab("transcript")}
+                role="tab"
+                id="tab-transcript"
+                aria-controls="panel-transcript"
+                aria-selected={activeTab === "transcript"}
                 className={`pb-4 px-2 font-semibold text-lg flex items-center gap-2 transition-colors relative ${
                   activeTab === "transcript"
                     ? "text-brand-red border-b-2 border-brand-red"
@@ -117,7 +129,12 @@ export default function EpisodePage() {
 
             <div className="min-h-[400px]">
               {activeTab === "shownotes" && (
-                <div className="animate-fade-in space-y-8">
+                <div
+                  className="animate-fade-in space-y-8"
+                  role="tabpanel"
+                  id="panel-shownotes"
+                  aria-labelledby="tab-shownotes"
+                >
                   <div className="prose prose-invert max-w-none">
                     <h3 className="text-xl font-bold text-white mb-4">
                       {isPt ? "Neste episódio:" : "In this episode:"}
@@ -146,7 +163,12 @@ export default function EpisodePage() {
               )}
 
               {activeTab === "transcript" && (
-                <div className="animate-fade-in space-y-6">
+                <div
+                  className="animate-fade-in space-y-6"
+                  role="tabpanel"
+                  id="panel-transcript"
+                  aria-labelledby="tab-transcript"
+                >
                   <div className="bg-brand-grey-dark/30 p-6 rounded-lg border border-brand-grey/10">
                     <p className="text-sm text-brand-grey italic mb-8 border-b border-brand-grey/10 pb-4">
                       {isPt

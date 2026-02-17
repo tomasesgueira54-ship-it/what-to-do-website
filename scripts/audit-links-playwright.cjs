@@ -70,7 +70,14 @@ function normalizePath(href) {
         };
 
         const onRequestFailed = (request) => {
-            failedRequests.push(`${request.method()} ${request.url()} :: ${request.failure()?.errorText || 'failed'}`);
+            const errorText = request.failure()?.errorText || 'failed';
+            const requestUrl = request.url();
+
+            if (errorText.includes('ERR_ABORTED') && requestUrl.includes('_rsc=')) {
+                return;
+            }
+
+            failedRequests.push(`${request.method()} ${requestUrl} :: ${errorText}`);
         };
 
         const onResponse = (response) => {

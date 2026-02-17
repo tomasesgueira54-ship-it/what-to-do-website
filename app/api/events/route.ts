@@ -3,8 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Event, MusicGenre, EventCategory } from "@/data/types";
 
-export const dynamic = "force-static";
-export const revalidate = 3600; // 1 hour
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/events

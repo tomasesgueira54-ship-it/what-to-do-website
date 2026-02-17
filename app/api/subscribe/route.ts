@@ -5,9 +5,75 @@ import { z } from 'zod';
 
 // In-memory storage (replace with database in production)
 const subscribers = new Set<string>();
+const requestLog = new Map<string, number[]>();
+
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+
+function getClientIp(request: NextRequest): string {
+    const forwarded = request.headers.get('x-forwarded-for');
+    if (forwarded) return forwarded.split(',')[0].trim();
+    const realIp = request.headers.get('x-real-ip');
+    if (realIp) return realIp.trim();
+    return 'unknown';
+}
+
+function isRateLimited(request: NextRequest): boolean {
+    const key = getClientIp(request);
+    const now = Date.now();
+    const recent = (requestLog.get(key) || []).filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
+    recent.push(now);
+    requestLog.set(key, recent);
+    return recent.length > RATE_LIMIT_MAX_REQUESTS;
+}
+
+function isAllowedOrigin(request: NextRequest): boolean {
+    const origin = request.headers.get('origin');
+    if (!origin) return true;
+    const host = request.headers.get('host');
+    if (!host) return false;
+
+    try {
+        const originUrl = new URL(origin);
+        return originUrl.host === host;
+    } catch {
+        return false;
+    }
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse<SubscribeResponse>> {
     try {
+        if (!isAllowedOrigin(request)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'Forbidden origin',
+                    error: 'FORBIDDEN_ORIGIN'
+                },
+                { status: 403 }
+            );
+        }
+
+        if (isRateLimited(request)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: 'Too many requests. Please try again later.',
+                    error: 'RATE_LIMITED'
+                },
+                { status: 429 }
+            );
+        }
+
         const body = await request.json();
 
         // Validate input
@@ -17,6 +83,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Subscribe
         const locale = (validated.locale || 'pt') as 'pt' | 'en';
         const normalizedEmail = validated.email.trim().toLowerCase();
         const normalizedName = validated.name.trim();
+        const safeName = escapeHtml(normalizedName);
 
         // Check if already subscribed
         if (subscribers.has(normalizedEmail)) {
@@ -45,7 +112,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Subscribe
             const emailBody = {
                 pt: `
           <h2>Bem-vindo ao What To Do!</h2>
-      <p>Olá ${normalizedName},</p>
+      <p>Olá ${safeName},</p>
           <p>Obrigado por te subscreveres à nossa newsletter.</p>
           <p>Vais receber actualizações sobre:</p>
           <ul>
@@ -58,7 +125,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Subscribe
         `,
                 en: `
           <h2>Welcome to What To Do!</h2>
-          <p>Hi ${normalizedName},</p>
+                <p>Hi ${safeName},</p>
           <p>Thank you for subscribing to our newsletter.</p>
           <p>You will receive updates about:</p>
           <ul>

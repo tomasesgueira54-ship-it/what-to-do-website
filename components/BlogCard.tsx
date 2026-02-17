@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FaArrowRight, FaClock } from "react-icons/fa";
 
 interface BlogCardProps {
@@ -16,11 +17,21 @@ interface BlogCardProps {
 
 export default function BlogCard({ post, locale = "pt" }: BlogCardProps) {
   const readMore = locale === "pt" ? "Ler mais" : "Read more";
+  const imageSrc = post.imageUrl?.startsWith("/images/")
+    ? "/images/placeholder-card.svg"
+    : post.imageUrl;
 
   return (
     <article className="card group">
       <Link href={`/${locale}/blog/${post.id}`}>
         <div className="relative h-56 overflow-hidden">
+          <Image
+            src={imageSrc}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
           <div className="absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all" />
           <div className="gradient-overlay" />
           <div className="absolute top-4 left-4">

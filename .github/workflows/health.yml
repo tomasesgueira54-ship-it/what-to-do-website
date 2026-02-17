@@ -3,9 +3,11 @@ name: Health Check
 on:
     pull_request:
         types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+jobs:
+    health:
         name: Health checks (build + audit + form tests)
         runs-on: ubuntu-latest
         steps:
@@ -39,50 +41,50 @@ on:
                   done
 
             - name: Run health script
-        id: run_health
-        run: BASE_URL=http://localhost:3000 npm run health
+              id: run_health
+              run: BASE_URL=http://localhost:3000 npm run health
 
-      - name: Notify Slack on success
-        if: success()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK" ]; then echo "No SLACK_WEBHOOK configured, skipping"; exit 0; fi
-          PAYLOAD=$(jq -n --arg t "✅ Health checks passed for ${{ github.repository }} (${GITHUB_REF#refs/heads/})" --arg u "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: ($t + "\n" + $u)}')
-          curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
+            - name: Notify Slack on success
+              if: success()
+              env:
+                  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+              run: |
+                  if [ -z "$SLACK_WEBHOOK" ]; then echo "No SLACK_WEBHOOK configured, skipping"; exit 0; fi
+                  PAYLOAD=$(jq -n --arg t "✅ Health checks passed for ${{ github.repository }} (${GITHUB_REF#refs/heads/})" --arg u "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: ($t + "\n" + $u)}')
+                  curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
 
-      - name: Notify Slack on failure
-        if: failure()
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK" ]; then echo "No SLACK_WEBHOOK configured, skipping"; exit 0; fi
-          PAYLOAD=$(jq -n --arg t "❌ Health checks failed for ${{ github.repository }} (${GITHUB_REF#refs/heads/})" --arg u "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: ($t + "\n" + $u)}')
-          curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
+            - name: Notify Slack on failure
+              if: failure()
+              env:
+                  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+              run: |
+                  if [ -z "$SLACK_WEBHOOK" ]; then echo "No SLACK_WEBHOOK configured, skipping"; exit 0; fi
+                  PAYLOAD=$(jq -n --arg t "❌ Health checks failed for ${{ github.repository }} (${GITHUB_REF#refs/heads/})" --arg u "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{text: ($t + "\n" + $u)}')
+                  curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
 
-      - name: Comment PR on success
-        if: ${{ github.event_name == 'pull_request' && success() }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ✅ Health checks passed for this PR.
+            - name: Comment PR on success
+              if: ${{ github.event_name == 'pull_request' && success() }}
+              uses: peter-evans/create-or-update-comment@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: |
+                      ✅ Health checks passed for this PR.
 
-            • Build: OK
-            • Audit: OK (site crawl)
-            • Subscribe form: OK
-            • Images: OK
+                      • Build: OK
+                      • Audit: OK (site crawl)
+                      • Subscribe form: OK
+                      • Images: OK
 
-            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                      [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-      - name: Comment PR on failure
-        if: ${{ github.event_name == 'pull_request' && failure() }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ❌ Health checks failed for this PR. Please check the workflow run for details.
+            - name: Comment PR on failure
+              if: ${{ github.event_name == 'pull_request' && failure() }}
+              uses: peter-evans/create-or-update-comment@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: |
+                      ❌ Health checks failed for this PR. Please check the workflow run for details.
 
-            [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                      [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})

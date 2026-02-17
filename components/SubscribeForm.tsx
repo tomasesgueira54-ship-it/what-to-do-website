@@ -106,10 +106,12 @@ export default function SubscribeForm({
           placeholder={translations[locale].namePlaceholder}
           disabled={status === "loading" || status === "success"}
           {...register("name")}
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "subscribe-name-error" : undefined}
           className="px-4 py-2 rounded bg-brand-black text-white border border-brand-grey focus:border-brand-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {errors.name && (
-          <p className="text-red-500 text-xs">{errors.name.message}</p>
+          <p id="subscribe-name-error" className="text-red-500 text-xs">{errors.name.message}</p>
         )}
 
         <input
@@ -117,10 +119,12 @@ export default function SubscribeForm({
           placeholder={translations[locale].placeholder}
           disabled={status === "loading" || status === "success"}
           {...register("email")}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "subscribe-email-error" : undefined}
           className="px-4 py-2 rounded bg-brand-black text-white border border-brand-grey focus:border-brand-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {errors.email && (
-          <p className="text-red-500 text-xs">{errors.email.message}</p>
+          <p id="subscribe-email-error" className="text-red-500 text-xs">{errors.email.message}</p>
         )}
 
         <label className="text-xs text-brand-grey flex items-start gap-2">
@@ -128,12 +132,14 @@ export default function SubscribeForm({
             type="checkbox"
             disabled={status === "loading" || status === "success"}
             {...register("gdprConsent")}
+            aria-invalid={!!errors.gdprConsent}
+            aria-describedby={errors.gdprConsent ? "subscribe-consent-error" : undefined}
             className="mt-0.5"
           />
           <span>{translations[locale].consentLabel}</span>
         </label>
         {errors.gdprConsent && (
-          <p className="text-red-500 text-xs">{errors.gdprConsent.message}</p>
+          <p id="subscribe-consent-error" className="text-red-500 text-xs">{errors.gdprConsent.message}</p>
         )}
 
         <button
@@ -150,8 +156,12 @@ export default function SubscribeForm({
         </button>
 
         {status === "error" && (
-          <p className="text-red-500 text-xs">{errorMsg}</p>
+          <p role="alert" aria-live="assertive" className="text-red-500 text-xs">{errorMsg}</p>
         )}
+
+        <div className="sr-only" aria-live="polite">
+          {status === "success" ? translations[locale].success : ""}
+        </div>
       </form>
     );
   }
@@ -168,6 +178,8 @@ export default function SubscribeForm({
             placeholder={translations[locale].namePlaceholder}
             disabled={status === "loading" || status === "success"}
             {...register("name")}
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? "subscribe-name-error-main" : undefined}
             className={`
               w-full px-4 py-3 rounded-lg bg-brand-black text-white 
               border border-brand-grey focus:border-brand-red focus:outline-none 
@@ -176,7 +188,7 @@ export default function SubscribeForm({
             `}
           />
           {errors.name && (
-            <p className="text-red-500 text-sm mt-1 mb-2">
+            <p id="subscribe-name-error-main" className="text-red-500 text-sm mt-1 mb-2">
               {errors.name.message}
             </p>
           )}
@@ -186,6 +198,8 @@ export default function SubscribeForm({
             placeholder={translations[locale].placeholder}
             disabled={status === "loading" || status === "success"}
             {...register("email")}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "subscribe-email-error-main" : undefined}
             className={`
               w-full px-4 py-3 rounded-lg bg-brand-black text-white 
               border border-brand-grey focus:border-brand-red focus:outline-none 
@@ -194,7 +208,7 @@ export default function SubscribeForm({
             `}
           />
           {errors.email && (
-            <p className="text-red-500 text-sm mt-2">{errors.email.message}</p>
+            <p id="subscribe-email-error-main" className="text-red-500 text-sm mt-2">{errors.email.message}</p>
           )}
 
           <label className="text-sm text-brand-grey flex items-start gap-2 mt-3">
@@ -202,12 +216,14 @@ export default function SubscribeForm({
               type="checkbox"
               disabled={status === "loading" || status === "success"}
               {...register("gdprConsent")}
+              aria-invalid={!!errors.gdprConsent}
+              aria-describedby={errors.gdprConsent ? "subscribe-consent-error-main" : undefined}
               className="mt-1"
             />
             <span>{translations[locale].consentLabel}</span>
           </label>
           {errors.gdprConsent && (
-            <p className="text-red-500 text-sm mt-2">
+            <p id="subscribe-consent-error-main" className="text-red-500 text-sm mt-2">
               {errors.gdprConsent.message}
             </p>
           )}
@@ -230,13 +246,13 @@ export default function SubscribeForm({
       </div>
 
       {status === "success" && (
-        <div className="p-3 bg-green-900/20 border border-green-600 rounded text-green-300 text-sm">
+        <div role="status" aria-live="polite" className="p-3 bg-green-900/20 border border-green-600 rounded text-green-300 text-sm">
           ✓ {translations[locale].success}
         </div>
       )}
 
       {status === "error" && (
-        <div className="p-3 bg-red-900/20 border border-red-600 rounded text-red-300 text-sm">
+        <div role="alert" aria-live="assertive" className="p-3 bg-red-900/20 border border-red-600 rounded text-red-300 text-sm">
           ✗ {errorMsg}
         </div>
       )}

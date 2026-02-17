@@ -1,8 +1,7 @@
 'use client'
 
 import { useAudio } from '../context/AudioContext'
-import { FaPlay, FaPause, FaTimes, FaStepBackward, FaStepForward } from 'react-icons/fa'
-import { useRef } from 'react'
+import { FaPlay, FaPause, FaTimes } from 'react-icons/fa'
 
 export default function StickyPlayer() {
   const { isPlaying, currentEpisode, togglePlay, closePlayer, currentTime, duration, seek } = useAudio()
@@ -43,18 +42,19 @@ export default function StickyPlayer() {
         {/* Controls */}
         <div className="flex flex-col items-center flex-1 max-w-xl">
           <div className="flex items-center gap-6 mb-2">
-            <button className="text-brand-grey hover:text-white transition-colors" title="Rewind 15s" onClick={() => seek(currentTime - 15)}>
+            <button className="text-brand-grey hover:text-white transition-colors" title="Rewind 15s" aria-label="Rewind 15 seconds" onClick={() => seek(currentTime - 15)}>
               <span className="text-xs font-bold">-15s</span>
             </button>
             
             <button 
               onClick={togglePlay}
               className="bg-brand-white text-brand-black hover:bg-brand-red hover:text-white p-3 rounded-full transition-all transform hover:scale-105"
+              aria-label={isPlaying ? 'Pause playback' : 'Play playback'}
             >
               {isPlaying ? <FaPause /> : <FaPlay className="pl-0.5" />}
             </button>
             
-            <button className="text-brand-grey hover:text-white transition-colors" title="Forward 15s" onClick={() => seek(currentTime + 15)}>
+            <button className="text-brand-grey hover:text-white transition-colors" title="Forward 15s" aria-label="Forward 15 seconds" onClick={() => seek(currentTime + 15)}>
               <span className="text-xs font-bold">+15s</span>
             </button>
           </div>
@@ -67,6 +67,7 @@ export default function StickyPlayer() {
               max={duration || 100} 
               value={currentTime} 
               onChange={handleSeek}
+              aria-label="Seek audio timeline"
               className="flex-1 h-1 bg-brand-grey/30 rounded-lg appearance-none cursor-pointer accent-brand-red"
             />
             <span>{formatTime(duration)}</span>
@@ -74,7 +75,7 @@ export default function StickyPlayer() {
         </div>
 
         {/* Extra space for volume or download later */}
-        <div className="flex-1 hidden md:flex justifies-end">
+        <div className="flex-1 hidden md:flex justify-end">
           {/* Placeholder for volume control */}
         </div>
 

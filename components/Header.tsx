@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { FaBars, FaTimes, FaPodcast } from "react-icons/fa";
 
 interface HeaderProps {
@@ -10,8 +11,28 @@ interface HeaderProps {
 
 export default function Header({ locale = "pt" }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const buildLocaleHref = (targetLocale: "pt" | "en") => {
+    if (!pathname || pathname === "/") return `/${targetLocale}`;
+    const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
+    if (normalized === "/pt" || normalized === "/en") {
+      return `/${targetLocale}`;
+    }
+
+    if (normalized.startsWith("/pt/")) {
+      return normalized.replace("/pt/", `/${targetLocale}/`);
+    }
+
+    if (normalized.startsWith("/en/")) {
+      return normalized.replace("/en/", `/${targetLocale}/`);
+    }
+
+    return `/${targetLocale}${normalized}`;
+  };
 
   const menuItems = [
     { name: locale === "pt" ? "Eventos" : "Events", href: `/${locale}/events` },
@@ -45,14 +66,14 @@ export default function Header({ locale = "pt" }: HeaderProps) {
             {/* Language Switcher */}
             <div className="flex items-center gap-2">
               <Link
-                href="/pt"
+                href={buildLocaleHref("pt")}
                 className={`text-sm transition-colors ${locale === "pt" ? "text-brand-red font-semibold" : "text-brand-grey hover:text-white"}`}
               >
                 PT
               </Link>
               <span className="text-brand-grey">/</span>
               <Link
-                href="/en"
+                href={buildLocaleHref("en")}
                 className={`text-sm transition-colors ${locale === "en" ? "text-brand-red font-semibold" : "text-brand-grey hover:text-white"}`}
               >
                 EN
@@ -74,11 +95,11 @@ export default function Header({ locale = "pt" }: HeaderProps) {
             </ul>
 
             {/* Subscribe Button */}
-            <li>
+            <div>
               <a href={`/${locale}#subscribe`} className="btn-primary">
                 {locale === "pt" ? "Subscrever" : "Subscribe"}
               </a>
-            </li>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,6 +107,7 @@ export default function Header({ locale = "pt" }: HeaderProps) {
             onClick={toggleMenu}
             className="md:hidden text-white text-2xl focus:outline-none"
             aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <FaTimes /> : <FaBars />}
           </button>
@@ -97,14 +119,14 @@ export default function Header({ locale = "pt" }: HeaderProps) {
             {/* Language Switcher Mobile */}
             <div className="flex items-center gap-2 mb-4">
               <Link
-                href="/pt"
+                href={buildLocaleHref("pt")}
                 className={`text-sm transition-colors ${locale === "pt" ? "text-brand-red font-semibold" : "text-brand-grey hover:text-white"}`}
               >
                 PT
               </Link>
               <span className="text-brand-grey">/</span>
               <Link
-                href="/en"
+                href={buildLocaleHref("en")}
                 className={`text-sm transition-colors ${locale === "en" ? "text-brand-red font-semibold" : "text-brand-grey hover:text-white"}`}
               >
                 EN

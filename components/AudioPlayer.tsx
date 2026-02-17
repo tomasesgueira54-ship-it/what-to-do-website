@@ -58,6 +58,7 @@ export default function AudioPlayer({ episodeTitle, audioUrl, episode }: AudioPl
         <button
           onClick={handlePlayPause}
           className="bg-brand-red hover:bg-brand-red-light text-white p-4 rounded-full transition-all"
+          aria-label={isActuallyPlaying ? 'Pause episode' : 'Play episode'}
         >
           {isActuallyPlaying ? <FaPause className="text-xl" /> : <FaPlay className="text-xl ml-1" />}
         </button>

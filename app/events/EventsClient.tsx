@@ -207,6 +207,16 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
   const labels = {
     musicGenre: locale === "pt" ? "Género de Música" : "Music Genre",
     upcoming: locale === "pt" ? "Próximos Eventos" : "Upcoming Events",
+    filters: locale === "pt" ? "Filtros" : "Filters",
+    clearAll: locale === "pt" ? "Limpar tudo" : "Clear all",
+    searchPlaceholder: locale === "pt" ? "Pesquisar..." : "Search...",
+    clearSearch: locale === "pt" ? "Limpar pesquisa" : "Clear search",
+    minDate: locale === "pt" ? "Data mínima" : "Minimum date",
+    freeOnly: locale === "pt" ? "Só gratuitos" : "Free only",
+    sortLabel: locale === "pt" ? "Ordenar" : "Sort",
+    sortAsc: locale === "pt" ? "Mais próximos" : "Soonest",
+    sortDesc: locale === "pt" ? "Mais distantes" : "Latest",
+    eventType: locale === "pt" ? "Tipo de Evento" : "Event Type",
     noResults:
       locale === "pt"
         ? "Nenhum evento encontrado com os filtros atuais."
@@ -340,7 +350,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
       <div className="bg-brand-black-light border border-brand-grey-dark/40 rounded-2xl p-4 md:p-6 shadow-lg">
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2 text-brand-grey uppercase tracking-widest text-xs font-bold">
-            <FaFilter /> Filtros
+            <FaFilter /> {labels.filters}
             {hasActiveFilters && (
               <span className="bg-brand-red text-white px-2 py-1 rounded text-xs font-bold">
                 {selectedCategories.size +
@@ -356,7 +366,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
               onClick={clearAllFilters}
               className="text-brand-grey hover:text-brand-red transition-colors text-xs font-bold flex items-center gap-1"
             >
-              <FaTimes /> Limpar tudo
+              <FaTimes /> {labels.clearAll}
             </button>
           )}
         </div>
@@ -364,18 +374,20 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search Filter */}
           <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-brand-red lg:col-span-1">
+            <span className="sr-only">{labels.searchPlaceholder}</span>
             <FaSearch className="text-brand-grey flex-shrink-0" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Pesquisar..."
+              placeholder={labels.searchPlaceholder}
+              aria-label={labels.searchPlaceholder}
               className="flex-1 bg-transparent text-white outline-none text-sm"
             />
             {query && (
               <button
                 className="text-brand-grey hover:text-white flex-shrink-0"
                 onClick={() => setQuery("")}
-                aria-label="Limpar pesquisa"
+                aria-label={labels.clearSearch}
               >
                 <FaTimes size={16} />
               </button>
@@ -384,7 +396,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
 
           {/* Date Filter */}
           <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
-            <span className="text-xs font-bold">Data mínima</span>
+            <span className="text-xs font-bold">{labels.minDate}</span>
             <input
               type="date"
               value={startDate}
@@ -401,19 +413,19 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
               onChange={(e) => setOnlyFree(e.target.checked)}
               className="accent-brand-red w-4 h-4 cursor-pointer"
             />
-            <span className="text-sm">Só gratuitos</span>
+            <span className="text-sm">{labels.freeOnly}</span>
           </label>
 
           {/* Sort Filter */}
           <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
-            <span className="text-xs font-bold">Ordenar</span>
+            <span className="text-xs font-bold">{labels.sortLabel}</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as "asc" | "desc")}
               className="bg-transparent border-b border-brand-grey-dark/50 px-0 py-1 text-white focus:outline-none focus:border-brand-red"
             >
-              <option value="asc">Mais próximos</option>
-              <option value="desc">Mais distantes</option>
+              <option value="asc">{labels.sortAsc}</option>
+              <option value="desc">{labels.sortDesc}</option>
             </select>
           </label>
         </div>
@@ -424,7 +436,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
             <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
               <FaTag size={12} className="text-brand-red" />
               <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
-                Tipo de Evento
+                {labels.eventType}
               </span>
               <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
                 {selectedCategories.size}
@@ -435,6 +447,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
                 <button
                   key={category}
                   onClick={() => toggleCategory(category)}
+                  aria-pressed={selectedCategories.has(category)}
                   className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
                     selectedCategories.has(category)
                       ? "bg-gradient-to-br from-brand-red via-red-600 to-brand-red-light text-white border border-red-500/50 shadow-[0_0_15px_-3px_rgba(220,38,38,0.5)] transform scale-105"
@@ -473,6 +486,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
                   <button
                     key={genre}
                     onClick={() => toggleGenre(genre)}
+                    aria-pressed={selectedGenres.has(genre)}
                     className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
                       selectedGenres.has(genre)
                         ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white border border-purple-500/50 shadow-[0_0_15px_-3px_rgba(147,51,234,0.5)] transform scale-105"

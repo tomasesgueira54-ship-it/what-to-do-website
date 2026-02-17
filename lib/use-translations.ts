@@ -1,10 +1,11 @@
-import { ReactNode } from 'react'
+import ptMessages from '@/messages/pt.json'
+import enMessages from '@/messages/en.json'
 
 type Messages = typeof import('@/messages/pt.json')
 
 const messages: Record<string, Messages> = {
-    pt: require('@/messages/pt.json'),
-    en: require('@/messages/en.json'),
+    pt: ptMessages,
+    en: enMessages,
 }
 
 export function useTranslations(locale: string) {
