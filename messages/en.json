@@ -1,0 +1,87 @@
+{
+  "header": {
+    "home": "Home",
+    "events": "Events",
+    "podcast": "Podcast",
+    "blog": "Guides",
+    "about": "About",
+    "subscribe": "Subscribe"
+  },
+  "home": {
+    "tagline": "Your Official Guide",
+    "title": "WHAT TO DO LISBON",
+    "description": "The best events, restaurants, experiences and hidden gems in Lisbon. Everything you need to make the most of the city.",
+    "cta_events": "View This Week's Agenda",
+    "cta_podcast": "Listen to Podcast",
+    "categories": [
+      "Concerts",
+      "Theater",
+      "Nightlife",
+      "Restaurants",
+      "Outdoors",
+      "Art"
+    ],
+    "featured": {
+      "title": "This Week's Highlights",
+      "subtitle": "The unmissable events in the coming days.",
+      "view_all": "View all events"
+    }
+  },
+  "events": {
+    "title": "Cultural Agenda",
+    "subtitle": "The best events, concerts, exhibitions and parties in Lisbon for this week.",
+    "total": "Total events",
+    "search_placeholder": "Search events (Coming soon)"
+  },
+  "blog": {
+    "title": "Guides & Itineraries",
+    "subtitle": "Discover our weekly curations, restaurant reviews and secret routes to explore Lisbon.",
+    "back": "Back"
+  },
+  "about": {
+    "title": "About What To Do - Lisbon",
+    "description": "Your definitive guide to discovering what to do in Lisbon. From unmissable events to hidden secrets, we bring you the best suggestions to make the most of the city.",
+    "sections": {
+      "agenda": {
+        "title": "Weekly Agenda",
+        "description": "Weekly curation of the best concerts, exhibitions, theater and parties happening in Lisbon."
+      },
+      "podcast": {
+        "title": "Podcast",
+        "description": "Conversations with Lisbon personalities, artists and entrepreneurs about their projects and their vision of the city."
+      },
+      "guides": {
+        "title": "Guides & Itineraries",
+        "description": "Suggestions for restaurants, bars, walks and unique experiences tested by our team."
+      }
+    },
+    "mission": "Our mission",
+    "mission_text": "Lisbon is full of life, but sometimes it's hard to know where to start. What To Do was born to answer the classic question: \"What are we going to do today?\".",
+    "mission_detail": "We want to connect you with the vibrant culture of the city, support local artists and ensure you never run out of weekend plans.",
+    "cta_episodes": "Listen to Episodes",
+    "cta_blog": "Read Articles"
+  },
+  "footer": {
+    "description": "Discover what to do through our podcast and blog. Inspiring stories, practical tips and quality entertainment.",
+    "quick_links": "Quick Links",
+    "newsletter": "Newsletter",
+    "newsletter_description": "Receive new episodes and articles directly in your email.",
+    "copyright": "What To Do - Blog & Podcast. All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "subscribe": {
+    "placeholder": "Your email...",
+    "button": "Subscribe",
+    "success": "Thank you! Check your email.",
+    "error": "Error subscribing. Try again.",
+    "already": "This email is already subscribed."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "try_again": "Try again",
+    "close": "Close"
+  }
+}

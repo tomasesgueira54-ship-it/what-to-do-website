@@ -1,0 +1,810 @@
+# ROADMAP COMPLETO: WHAT TO DO LISBOA
+## Da Criação do Instagram ao Programa de Afiliados Próprio
+
+---
+
+## ÍNDICE
+
+1. Visão Geral do Projeto
+2. Calendário de Publicações Instagram
+3. Estrutura dos Posts (Carrosséis de 10 Slides)
+4. Estratégia de Conteúdo e Engagement
+5. Ferramentas e Recursos
+6. KPIs e Métricas a Monitorizar
+7. Como Tornar-se Parceiro de Promotores
+8. Roadmap de Evolução (6 Fases)
+9. Modelo de Métricas para Apresentar a Promotores
+10. Pitch de Apresentação Comercial
+11. Lista de Websites para Pesquisa de Eventos
+12. Templates de Contacto (DMs e Emails)
+
+---
+
+## 1. VISÃO GERAL DO PROJETO
+
+### Identidade
+- **Nome:** What To Do Lisboa
+- **Instagram:** @whattodo_lisboa
+- **Missão:** Recomendar os melhores programas em Lisboa para diferentes momentos do fim de semana
+- **Objetivo Final:** Criar programa de afiliados próprio, vendendo bilhetes de eventos e ganhando comissão
+
+### Identidade Visual
+- **Logótipo:** "What To Do" em branco sobre fundo escuro/preto com detalhes em vermelho néon
+- **Paleta de cores:** Preto, vermelho néon (#FF0000), branco
+- **Estilo:** Moderno, elegante, urbano, energético
+
+### Público-Alvo
+- Residentes em Lisboa (20-40 anos)
+- Turistas procurando programas autênticos
+- Profissionais que saem do trabalho
+- Jovens adultos interessados em vida noturna
+- Famílias e grupos que planeiam fins de semana
+
+---
+
+## 2. CALENDÁRIO DE PUBLICAÇÕES INSTAGRAM
+
+### Frequência: 3 Posts por Semana
+
+| Dia | Horário | Tema | Público-Alvo |
+|-----|---------|------|--------------|
+| **Terça-feira** | 18h00 | 10 Coisas Para Fazer no Fim de Tarde em Lisboa | Pessoas que saem do trabalho e procuram atividades pós-laboral |
+| **Quinta-feira** | 12h00 | 10 Coisas Para Fazer de Manhã e Tarde (Fim de Semana) | Pessoas a planear atividades diurnas de sábado/domingo |
+| **Sexta-feira** | 20h00 | 10 Coisas Para Fazer nas Noites de Sexta, Sábado e Domingo | Público interessado em vida noturna lisboeta |
+
+---
+
+## 3. ESTRUTURA DOS POSTS (CARROSSÉIS DE 10 SLIDES)
+
+### Slide 1 - CAPA
+- Título grande e impactante
+- Cores da marca (preto/vermelho/branco)
+- Indicação visual: "Desliza →" ou seta
+- Design que pare o scroll
+
+### Slides 2-11 - CONTEÚDO (1 sugestão por slide)
+Cada slide deve incluir:
+- **Nome do Local/Evento** (destaque, fonte grande)
+- **Descrição concisa** (2-3 linhas máximo)
+- **Informações práticas:**
+  - Preço (€, €€ ou €€€ ou valor exato)
+  - Horário (se relevante)
+  - Localização/Bairro
+- **Ícones visuais** para categorizar:
+  - 🎵 Música/Concertos
+  - 🍽️ Gastronomia
+  - 🎨 Cultura/Arte
+  - 🌃 Vida Noturna
+  - 🌳 Ar Livre
+  - 👨‍👩‍👧‍👦 Família
+
+### Variedade de Conteúdo (cada lista de 10)
+- 2-3 opções de gastronomia (restaurantes, mercados, brunch)
+- 2-3 opções culturais (museus, exposições, teatro)
+- 2-3 opções de vida noturna (bares, clubes, concertos)
+- 1-2 opções ao ar livre (miradouros, jardins, passeios)
+- 1-2 opções alternativas/secretas/menos conhecidas
+
+### Distribuição de Preços
+- 3-4 opções grátis ou até 10€
+- 4-5 opções 10-30€
+- 2-3 opções acima de 30€
+
+---
+
+## 4. ESTRUTURA DA LEGENDA DO POST
+
+```
+[HOOK - 1 linha impactante]
+[emoji relevante] [Frase que capture atenção e resuma o valor]
+
+[CORPO - Destacar 2-3 sugestões principais]
+[emoji] Sugestão 1
+
+[emoji] Sugestão 2
+
+[emoji] Sugestão 3
+
+[CALL TO ACTION]
+Desliza para ver as 10 → [pergunta para engagement]
+
+[HASHTAGS - 10-15 hashtags]
+#LisboaNoite #VisitLisboa #WeekendLisboa #LisboaSecreta 
+#CoisasParaFazerLisboa #ProgramaLisboa #DescubraLisboa 
+#LisboaAoVivo #TimeOutLisboa #LisboaCool #ExploraLisboa
+[+ hashtags específicas do tema]
+```
+
+**Comprimento ideal:** 125-150 palavras
+
+### Tom de Comunicação
+- Informal mas informativo
+- Entusiasta e energético
+- Português de Portugal
+- Emojis com moderação (2-4 por legenda)
+
+---
+
+## 5. ESTRATÉGIA DE STORIES
+
+### Timeline de Stories por Post
+
+**2-3 Horas Antes da Publicação**
+1. Story Teaser: "Hoje às 20h novo post – 10 coisas para fazer este FDS"
+2. Countdown Sticker para gerar antecipação
+
+**Imediatamente Após Publicação**
+3. Reshare do Post com link "Ver Post Completo"
+4. 10 Stories Individuais (1 por sugestão) com:
+   - Caixa de perguntas: "Já foste aqui?"
+   - Reações por emoji
+   - Enquetes: "Vale a pena? SIM/NÃO"
+
+**Story Final Interativo**
+5. "Qual destes lugares queres saber mais detalhes?"
+   - Quiz ou caixa de perguntas abertas
+
+**Durante o Fim de Semana**
+6. Repostar User Generated Content (UGC) de seguidores
+7. Behind the Scenes: preparação do próximo post
+
+### Elementos Interativos e Benefícios
+
+| Elemento | Benefício |
+|----------|-----------|
+| Enquetes | Fácil interação, aumenta visualizações |
+| Caixa de Perguntas | Gera conversas nas DMs |
+| Quiz | Gamificação, aumenta tempo de visualização |
+| Countdown | Cria antecipação e lembretes |
+| Reações por Emoji | Interação rápida, dados sobre preferências |
+| Link para Post | Direciona trânsito do story para feed |
+
+**Stories com elementos interativos têm taxas de engagement 2-3x superiores.**
+
+---
+
+## 6. FERRAMENTAS E RECURSOS
+
+### Design e Criação de Conteúdo
+- **Canva Pro:** Templates de carrossel personalizáveis, brand kit
+- **Figma:** Design profissional, sistema reutilizável
+- **Adobe Lightroom Mobile:** Edição de fotos com presets consistentes
+
+### Agendamento e Análise
+- **Later:** Agendamento visual, preview do feed, análise de melhores horários
+- **Metricool:** Analytics detalhados de engagement, alcance, crescimento, hashtags
+- **Instagram Insights:** Dados nativos sobre audiência e performance
+
+### Recursos de Imagem
+- **Unsplash/Pexels:** Fotografias gratuitas de Lisboa
+- **Fotografias próprias:** Sempre preferível para autenticidade
+- **Parcerias com locais:** Solicitar imagens oficiais dos venues
+
+---
+
+## 7. KPIs E MÉTRICAS A MONITORIZAR
+
+### Métricas Essenciais
+
+| Métrica | Objetivo | Como Medir |
+|---------|----------|------------|
+| Taxa de Swipe | 60% chegam ao slide 10 | Instagram Insights |
+| Engagement Rate | 5% por post | (Likes+Comments+Shares)/Alcance |
+| Saves | 50+ por post | Instagram Insights |
+| Shares | 30+ por post | Instagram Insights |
+| Story Views | 70% dos seguidores | Instagram Insights |
+| Respostas Stories | 20+ por dia de post | DMs recebidas |
+| Crescimento | 5-10% seguidores/mês | Análise semanal |
+
+### Análise Semanal (terças-feiras)
+1. Revisar desempenho dos 3 posts da semana anterior
+2. Identificar qual tema gerou mais engagement (tarde/manhã/noite)
+3. Analisar quais sugestões específicas tiveram mais reações
+4. Ajustar estratégia de hashtags baseado em alcance
+5. Identificar melhores horários reais de publicação
+
+### Ajustes Baseados em Dados (Mês 2-3)
+- Se posts de noite têm 2x mais engagement → considerar 2 posts de noite/semana
+- Se carrosséis têm baixa taxa de swipe (<40%) → simplificar design, reduzir texto
+- Se stories interativos geram muitas DMs → criar mais oportunidades de conversação
+- Se saves são altos mas shares baixos → adicionar CTAs mais diretos
+
+---
+
+## 8. ESTRATÉGIAS DE CRESCIMENTO
+
+### Hashtag Strategy
+Mix de 3 tipos:
+1. **Alto volume (500k-2M posts):** #VisitLisboa #Portugal #TravelPortugal
+2. **Médio volume (50k-500k posts):** #LisboaNoite #WeekendLisboa #CoisasParaFazerLisboa
+3. **Nicho (<50k posts):** #LisboaSecreta #LisboaAoVivo #PinkStreetLisboa
+
+**Importante:** Rotacionar grupos de hashtags entre posts para evitar spam.
+
+### Engagement Autêntico (Ações Diárias)
+- Responder a TODOS os comentários nos primeiros 60 minutos
+- Responder a TODAS as DMs com recomendações personalizadas
+- Interagir com contas de Lisboa (curtir, comentar)
+- Repostar UGC de seguidores que mencionam a página
+- Criar highlight para cada tipo: "Tardes", "Dias", "Noites"
+
+---
+
+## 9. COMO TORNAR-SE PARCEIRO DE PROMOTORES
+
+### O Que Tens de Oferecer
+- Audiência real e segmentada (seguidores interessados em sair em Lisboa)
+- Conteúdo consistente (3 posts/semana, stories, reels, reviews)
+- Prova social: exemplos de posts, métricas (alcance, saves, shares, replies)
+- Posicionamento claro: "guia de programas em Lisboa"
+
+### Tipos de Parceria
+- **Guest list / convites** em troca de divulgação antes e depois
+- **Códigos promocionais** (ex.: WHATTODO10) para medir conversões
+- **Media partner:** logótipo no cartaz + cobertura completa
+- **Conteúdo conjunto:** giveaways, reels com bastidores, entrevistas
+
+### Requisitos Mínimos
+- Perfil profissional bem arrumado (bio clara, destaque "Parcerias")
+- Calendário de conteúdos estável há pelo menos 1-3 meses
+- Media kit simples em PDF/Notion
+- Política de parceria básica: o que garantes e o que esperas
+
+### Como Abordar Promotores
+
+**1. Mapeia quem te interessa**
+- Casas e promotores que já usas nos conteúdos
+- Vai aos perfis de Instagram, identifica quem faz comunicação
+
+**2. Abordagem inicial (DM ou email)**
+
+**Estrutura:**
+- Quem és: página @whattodo_lisboa, foco em recomendar programas em Lisboa
+- Prova: "Divulgamos semanalmente eventos de X, Y, Z, com alcance médio de ___"
+- Proposta concreta: "Gostava de alinhar convites/media partnership para os vossos eventos, em troca de X stories + 1 carrossel na semana do evento, mais reviews no dia seguinte"
+
+**3. Adapta a proposta ao tipo**
+- **Eventos grandes/festivais:** Media partner (logótipo, entrevistas, conteúdos dedicados)
+- **Clubs/bars:** Levar público semanal (guest list, códigos, "noite What To Do")
+- **Cultura (teatros/museus):** Reviews, contextualização, novos públicos
+
+### Fechar e Manter Parcerias
+- Sê específico: número de posts, datas, formatos, tags acordados
+- Pede sempre material oficial: cartazes, press release, links
+- Depois do evento, envia mini-report: prints de alcance, saves, replies, conversões
+- Mantém comunicação profissional: tudo por escrito (email/WhatsApp)
+
+---
+
+## 10. ROADMAP DE EVOLUÇÃO (6 FASES)
+
+### FASE 1 – FUNDAÇÃO NO INSTAGRAM (0-3 MESES)
+
+**Objetivos:**
+- Provar consistência e criar hábito na audiência
+- Estabelecer identidade visual e calendário de conteúdo
+
+**Ações:**
+- Definir posicionamento e branding completo
+- Bio clara + destaques estruturados
+- Publicar 3 carrosséis/semana religiosamente
+- Stories diários com enquetes, perguntas, reposts
+
+**Métricas-Alvo:**
+- 1k-3k seguidores reais e locais
+- Alcance médio: 1k-3k contas/post
+- 30+ saves/post
+- 20+ respostas a stories/semana
+
+---
+
+### FASE 2 – AUTORIDADE E PARCERIAS ORGÂNICAS (3-6 MESES)
+
+**Objetivos:**
+- Ganhar acesso e prova social
+- Tornar "What To Do Lisboa" reconhecido por venues
+
+**Ações:**
+- Começar Reels (15-30s): "3 coisas para fazer hoje em Lisboa"
+- Reviews pós-evento (stories/reels com opinião honesta)
+- Primeiras parcerias: guest list/convites em troca de divulgação
+- Criar media kit simples (Notion/PDF)
+
+**Tipos de Parceiros Iniciais:**
+- Bares, rooftops
+- Casas de espetáculo
+- Promotores de noites
+
+**Métricas-Alvo:**
+- 3k-7k seguidores
+- 5-10 parcerias pontuais fechadas
+- Destaque "Parcerias" com provas sociais
+
+---
+
+### FASE 3 – LANÇAR WEBSITE/PLATAFORMA (6-9 MESES)
+
+**Objetivos:**
+- Mostrar que tens plataforma própria além do Instagram
+- Preparar terreno para programa de afiliados
+
+**Ações:**
+- Criar website simples:
+  - Home: destaques da semana
+  - Agenda: lista de eventos (links oficiais)
+  - Blog/Guias: "10 rooftops", "Onde ouvir fado"
+  - Página "Parcerias" + formulário de contacto
+
+**Integração com Instagram:**
+- Link na bio → website (não só Linktree)
+- CTAs nos posts: "Agenda completa no site"
+- Usar UTM links para tracking
+
+**Começar com Links de Bilhetes:**
+- Usar links de Fever, Ticketline, Blueticket, Shotgun
+- Objetivo: entender cliques e interesse
+
+**Métricas-Alvo:**
+- 5k-10k seguidores
+- 2k-5k visitas/mês ao site
+- 5-15 cliques/evento (via UTM)
+
+---
+
+### FASE 4 – TESTAR PROGRAMAS DE AFILIADOS EXISTENTES (9-12 MESES)
+
+**Objetivos:**
+- Provar que consegues vender bilhetes
+- Gerar primeiras comissões
+
+**Ações:**
+- Candidatar-te a programas de afiliados:
+  - Fever – Programa de Afiliados
+  - BOL / Ticketline Afiliados
+  - Outras plataformas
+
+**Integrar Links de Afiliado:**
+- No site: botão "Comprar bilhetes" → link afiliado
+- No Instagram: link em stories + bio com landing page
+
+**Acompanhar:**
+- Cliques → vendas (via dashboard de afiliado)
+- Quais tipos de eventos convertem melhor
+
+**Métricas-Alvo:**
+- 50-200 bilhetes vendidos via afiliado
+- Taxa de conversão: 1-3% dos cliques
+- Primeiras receitas de comissão comprovadas
+
+---
+
+### FASE 5 – PROPOSTA DE PROGRAMA DE AFILIADOS PRÓPRIO (12+ MESES)
+
+**Objetivos:**
+- Criar programa de afiliados próprio
+- Trabalhar diretamente com promotores
+
+**Definir Modelo:**
+- % por bilhete vendido (5-10% do valor ou da taxa de serviço)
+- Tipos de eventos elegíveis: Lisboa, 18-45 anos, cultura/noite/experiências
+- Formato: promotores criam evento, tu publicas na plataforma + promo nas redes
+
+**Infraestrutura Técnica (opções):**
+1. Manter modelo afiliado via Fever/Ticketline + contratos diretos com alguns promotores
+2. Escalar para white label ticketing (plataforma com teu branding)
+3. Construir mini-marketplace com Stripe/checkout próprio
+
+**Proposta Comercial:**
+
+**O Que Tu Dás:**
+- Presença no site + destaque em Instagram
+- Gestão de páginas de evento (textos, imagens, CTAs)
+- Promoção consistente (carrosséis, stories, reels)
+
+**O Que Recebes:**
+- Comissão por bilhete vendido
+- Acesso a dados agregados de vendas
+
+---
+
+### FASE 6 – ESCALA E OTIMIZAÇÃO (18+ MESES)
+
+**Ações:**
+- Testar diferentes tipos de eventos (onde conversão é maior)
+- Criar relatórios trimestrais para promotores
+- Otimizar funis de conversão
+- Expansão eventual:
+  - Newsletter semanal "What To Do Lisboa"
+  - App própria com agenda + compra de bilhetes
+
+---
+
+## 11. MODELO DE MÉTRICAS PARA APRESENTAR A PROMOTORES
+
+### Template de Media Kit
+
+```
+═══════════════════════════════════════
+WHAT TO DO LISBOA – MEDIA KIT 2026
+═══════════════════════════════════════
+
+SOBRE O PROJETO
+Página de Instagram focada em recomendar os melhores programas em Lisboa 
+para diferentes momentos: tardes, dias e noites de fim de semana.
+
+AUDIÊNCIA
+├─ Seguidores: [X.XXX]
+├─ Localização: 85% Lisboa e arredores
+├─ Idade: 20-40 anos (68% do público)
+├─ Interesses: Vida noturna, cultura, gastronomia, experiências
+└─ Género: 55% F / 45% M
+
+PERFORMANCE MÉDIA (ÚLTIMOS 3 MESES)
+├─ Alcance por post: [X.XXX] contas
+├─ Impressões por post: [X.XXX]
+├─ Engagement rate: [X]%
+├─ Saves por post: [XX]
+├─ Shares por post: [XX]
+├─ Respostas a stories: [XX] por semana
+└─ Taxa de cliques para links: [X]%
+
+FORMATOS DE CONTEÚDO
+├─ 3 carrosséis/semana (10 slides cada)
+├─ Stories diários (10-15 por dia)
+├─ Reels semanais
+└─ Reviews pós-evento
+
+PLATAFORMA WEB
+├─ Visitas mensais: [X.XXX]
+├─ Taxa de cliques para bilhetes: [X]%
+├─ Tempo médio no site: [X] min
+└─ Bilhetes vendidos (últimos 3 meses): [XXX]
+
+TIPOS DE PARCERIA DISPONÍVEIS
+
+1. PARCERIA BÁSICA (Guest List)
+   └─ 1 carrossel mencionando o evento
+   └─ 5-10 stories no dia do evento
+   └─ Acesso para 2 pessoas
+
+2. PARCERIA MEDIA PARTNER
+   └─ 2 carrosséis (anúncio + reminder)
+   └─ 10-15 stories ao longo da semana
+   └─ Review pós-evento
+   └─ Reel dedicado
+   └─ Acesso para 2-4 pessoas
+
+3. PARCERIA COMERCIAL (Afiliados/Comissão)
+   └─ Página dedicada no website
+   └─ 2-3 carrosséis + stories + reels
+   └─ Link de vendas direto na bio
+   └─ Comissão por bilhete vendido: [X]%
+   └─ Relatório de vendas pós-evento
+
+CASOS DE SUCESSO
+[Incluir 2-3 exemplos de eventos anteriores com métricas reais]
+
+CONTACTO
+Email: [email]
+Instagram: @whattodo_lisboa
+Website: [url]
+```
+
+---
+
+## 12. PITCH DE APRESENTAÇÃO COMERCIAL
+
+### Email/DM Template – Proposta de Afiliados
+
+```
+Assunto: Parceria Comercial – What To Do Lisboa
+
+Olá [Nome],
+
+Sou o [Teu Nome], criador da What To Do Lisboa – uma plataforma 
+focada em recomendar os melhores programas em Lisboa.
+
+Atualmente temos:
+→ [X.XXX] seguidores no Instagram (85% em Lisboa)
+→ [X.XXX] visitas mensais no site
+→ [XXX] bilhetes vendidos via parcerias nos últimos 3 meses
+
+Gostava de propor uma parceria comercial para os eventos de 
+[Nome do Promotor/Venue]:
+
+O QUE GARANTIMOS:
+✓ Página dedicada do evento no nosso site
+✓ 2-3 posts no Instagram (carrosséis + reels)
+✓ 15-20 stories promocionais ao longo da semana
+✓ Link direto para compra de bilhetes na bio
+✓ Audiência qualificada interessada em sair em Lisboa
+
+O QUE PROPOMOS:
+✓ Comissão de [X]% por cada bilhete vendido através da nossa 
+  plataforma
+✓ Relatório detalhado pós-evento com métricas de vendas e alcance
+✓ Código promocional exclusivo (opcional) para tracking
+
+Temos experiência comprovada a converter audiência em vendas, 
+especialmente em eventos de [tipo: cultura/noite/experiências].
+
+Podemos agendar uma chamada de 15 minutos para discutir esta 
+parceria? Tenho total disponibilidade esta semana.
+
+Obrigado,
+[Teu Nome]
+What To Do Lisboa
+[Instagram] | [Website] | [Email] | [Telefone]
+
+P.S.: Anexo o nosso media kit com métricas detalhadas.
+```
+
+---
+
+### DM Template – Contacto Inicial Simples
+
+```
+Olá! 👋
+
+Sou o [Nome], criador da @whattodo_lisboa – recomendamos 
+os melhores programas em Lisboa para [X.XXX] seguidores.
+
+Vi que têm [evento/programação] interessante e gostava de 
+explorar uma parceria.
+
+Atualmente trabalhamos com um modelo de afiliados: 
+promovemos os vossos eventos no Instagram + site e 
+recebemos comissão por bilhetes vendidos.
+
+Nos últimos 3 meses vendemos [XXX] bilhetes para eventos 
+semelhantes.
+
+Faz sentido alinharmos uma conversa rápida? 🚀
+
+Obrigado!
+```
+
+---
+
+## 13. LISTA DE WEBSITES PARA PESQUISA DE EVENTOS
+
+### Plataformas de Bilhetes e Experiências
+- **Fever** (feverup.com/pt/lisboa) – Candlelight, experiências imersivas, workshops, tours
+- **Shotgun** (shotgun.live/pt-pt) – Festas, clubes, raves, música eletrónica
+- **Ticketline** (ticketline.pt) – Concertos, teatro, festivais, grandes salas
+- **MEO Blueticket** (blueticket.meo.pt) – Grandes espetáculos, festivais, museus
+- **Billetto Portugal** (billetto.pt) – Eventos independentes, festas, workshops
+- **Eventbrite** (eventbrite.pt) – Conferências, meetups, eventos internacionais
+
+### Agendas Culturais e Guias de Lisboa
+- **Agenda LX** (agendalx.pt) – Agenda cultural oficial (teatro, museus, exposições)
+- **EGEAC** (egeac.pt/programacao-espacos-culturais) – Museus e teatros municipais
+- **Lisboa Secreta** (lisboasecreta.co) – Curadoria de programas e experiências especiais
+- **Time Out Lisboa** (timeout.pt/lisboa) – Guia de restaurantes, bares, eventos
+- **Lisboa ao Vivo** (lisboaaovivo.com) – Concertos e música ao vivo
+
+### Rotina Sugerida
+Abre **Fever + Shotgun + Ticketline/Blueticket + Agenda LX + EGEAC** 
+uma vez por semana para scan de novas datas. Usa Billetto/Eventbrite 
+para eventos mais alternativos.
+
+---
+
+## 14. TEMPLATES DE CONTACTO
+
+### Template 1: Email para Venue/Casa de Espetáculos
+
+```
+Assunto: Parceria What To Do Lisboa – [Nome do Venue]
+
+Olá [Nome],
+
+O meu nome é [Teu Nome] e sou o criador da What To Do Lisboa, 
+uma plataforma dedicada a recomendar os melhores programas em Lisboa.
+
+Acompanho o trabalho de [Nome do Venue] e adorava explorar uma 
+parceria para os vossos eventos.
+
+SOBRE O WHAT TO DO LISBOA:
+→ [X.XXX] seguidores no Instagram (público: 20-40 anos, Lisboa)
+→ 3 posts semanais com 10 recomendações cada
+→ Alcance médio de [X.XXX] contas por post
+→ [X.XXX] visitas mensais no website
+
+PROPOSTA:
+Gostava de promover os vossos eventos através de:
+✓ Destaque em carrosséis Instagram (10 slides)
+✓ 10-15 stories com elementos interativos
+✓ Página dedicada no website com link direto
+✓ Reviews pós-evento
+
+EM TROCA:
+✓ Guest list para 2 pessoas por evento OU
+✓ Acordo de media partner com acesso completo OU
+✓ Modelo de comissão por bilhetes vendidos
+
+Anexo o nosso media kit com métricas detalhadas e casos de sucesso.
+
+Podemos agendar uma chamada para discutir?
+
+Obrigado!
+[Teu Nome]
+[Instagram] | [Email] | [Telefone]
+```
+
+---
+
+### Template 2: DM para Promotor de Festas
+
+```
+Olá! 🎉
+
+Sou o [Nome] da @whattodo_lisboa – promovemos os melhores 
+programas de noite em Lisboa para [X.XXX] seguidores.
+
+Adorei o lineup de [Nome do Evento] e queria propor uma parceria:
+
+O QUE FAZEMOS:
+→ Post dedicado no feed (alcance [X.XXX]+)
+→ 10+ stories interativos no dia do evento
+→ Link direto na bio para bilhetes
+
+O QUE PEDIMOS:
+→ Guest list para 2 pessoas
+→ Material promocional (cartazes, vídeos)
+
+Já fizemos parcerias com [exemplo 1], [exemplo 2] e tivemos 
+ótimos resultados. Posso enviar o media kit por email?
+
+Vamos falar? 🚀
+```
+
+---
+
+### Template 3: Proposta de Comissão/Afiliados
+
+```
+Olá [Nome],
+
+Sou o [Teu Nome] da What To Do Lisboa.
+
+Gostava de propor um modelo diferente de parceria: em vez de 
+apenas divulgação, que tal tornarmo-nos um canal de vendas para 
+os vossos eventos?
+
+COMO FUNCIONA:
+1. Criamos página dedicada do evento no nosso site
+2. Promovemos massivamente no Instagram ([X.XXX] seguidores)
+3. Vendemos bilhetes através de link direto
+4. Ficamos com [X]% de comissão por bilhete vendido
+
+VANTAGENS PARA VÓS:
+✓ Mais um canal de vendas sem custo inicial
+✓ Público qualificado (20-40 anos, interessado em sair)
+✓ Promoção contínua antes e durante o evento
+✓ Relatório de vendas e métricas pós-evento
+
+Nos últimos 3 meses vendemos [XXX] bilhetes para eventos 
+semelhantes.
+
+Interesse em explorar este modelo?
+
+Obrigado,
+[Teu Nome]
+[Contactos]
+```
+
+---
+
+## 15. CHECKLIST DE PUBLICAÇÃO
+
+### Antes de Publicar
+- [ ] 10 slides criados com design consistente
+- [ ] Todas as informações verificadas (horários, preços, localizações)
+- [ ] Legenda escrita (hook, destaques, CTA, hashtags)
+- [ ] Stories de teaser agendados 2-3h antes
+- [ ] Countdown ativado nos stories
+- [ ] Primeira localização marcada no post
+
+### No Momento da Publicação
+- [ ] Publicar no horário exato definido
+- [ ] Imediatamente reshare nos stories
+- [ ] Fixar comentário com contexto adicional
+- [ ] Notificar 2-3 amigos para interagir (impulsiona algoritmo)
+
+### Primeira Hora Após Publicação
+- [ ] Responder a TODOS os comentários
+- [ ] Publicar 10 stories individuais das sugestões
+- [ ] Monitorizar DMs e responder rapidamente
+- [ ] Partilhar em stories pessoais se aplicável
+
+### 24 Horas Após Publicação
+- [ ] Análise de métricas (alcance, engagement, saves, shares)
+- [ ] Identificar qual sugestão teve mais reações
+- [ ] Repostar UGC de seguidores
+- [ ] Story de resultados: "Qual foi o vosso favorito?"
+
+---
+
+## 16. PLANO DE CONTINGÊNCIA
+
+### Backup de Conteúdo
+- 6-9 posts pré-criados e agendados
+- 20-30 stories templates preparados
+- Lista de 100+ locais categorizados (manhã/tarde/noite)
+- Fotografias editadas e organizadas
+
+### Situações de Crise
+
+**Local fecha inesperadamente:**
+→ Ter sempre alternativas similares preparadas
+→ Atualizar imediatamente nos comentários
+
+**Evento cancelado:**
+→ Story urgente com aviso e alternativa
+→ Comentário fixado no post
+
+**Baixo engagement:**
+→ Testar horários diferentes
+→ Aumentar interatividade nos stories
+→ Fazer giveaway simples
+
+**Comentários negativos:**
+→ Responder profissionalmente
+→ Oferecer solução
+→ Mover para DM se necessário
+
+---
+
+## 17. CONSIDERAÇÕES FINAIS
+
+### Pilares Fundamentais do Sucesso
+
+1. **CONSISTÊNCIA**
+   - Publicar religiosamente nos dias e horários definidos
+   - Manter qualidade visual e editorial
+
+2. **QUALIDADE**
+   - Verificar todas as informações
+   - Usar imagens de alta qualidade
+   - Escrever copy envolvente
+
+3. **COMUNIDADE**
+   - Interagir genuinamente com seguidores
+   - Responder mensagens rapidamente
+   - Criar conversas reais
+
+### Timeline de Revisão
+- **Semanal:** Análise de performance dos 3 posts
+- **Mensal:** Ajustes de estratégia baseados em dados
+- **Trimestral:** Revisão completa do roadmap
+
+### Expectativas Realistas
+
+**Primeiros 3 meses:** Crescimento orgânico lento mas consistente
+**Meses 3-6:** Aceleração com parcerias e reconhecimento
+**Meses 6-12:** Consolidação como referência + primeiras receitas
+**12+ meses:** Programa de afiliados próprio + escala
+
+---
+
+## PRÓXIMOS PASSOS IMEDIATOS
+
+1. [ ] Criar perfil Instagram @whattodo_lisboa
+2. [ ] Definir paleta de cores e templates no Canva
+3. [ ] Pesquisar 30 eventos para primeiros 3 posts
+4. [ ] Criar calendário editorial para Fevereiro/Março
+5. [ ] Publicar primeiro carrossel
+6. [ ] Começar engagement diário (comentar, responder, interagir)
+7. [ ] Documentar métricas desde o dia 1
+
+---
+
+**Preparado por:** What To Do Lisboa
+**Data:** Fevereiro 2026
+**Versão:** 1.0
+
+---
+
+*Este documento deve ser revisto e atualizado trimestralmente 
+com base em dados reais de performance.*

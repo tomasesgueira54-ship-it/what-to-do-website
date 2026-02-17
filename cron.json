@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "fetch:events": "npx ts-node scripts/fetch-events.ts"
+  },
+  "crontab": {
+    "schedule": "0 8 * * *",
+    "command": "npm run fetch:events"
+  }
+}

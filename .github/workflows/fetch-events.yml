@@ -1,0 +1,36 @@
+name: Fetch events (scheduled)
+
+on:
+    schedule:
+        - cron: "0 6 * * *" # daily at 06:00 UTC
+    workflow_dispatch: {}
+
+jobs:
+    fetch:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Playwright browsers
+              run: npx playwright install --with-deps
+
+            - name: Run fetch-events script
+              run: npx tsx scripts/fetch-events.ts
+
+            - name: Commit updated events.json
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add data/events.json || true
+                  git commit -m "chore: update fetched events" || echo "no changes to commit"
+                  git push || echo "push failed"

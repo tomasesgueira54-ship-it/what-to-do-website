@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-red: #8e0d3c;
+  --brand-red-light: #c10206;
+  --brand-black: #000000;
+  --brand-grey-dark: #252523;
+  --brand-grey: #6e6e6e;
+  --brand-white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--brand-white);
+  background: var(--brand-black);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-red hover:bg-brand-red-light text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-brand-red hover:bg-brand-red text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
+  }
+
+  .section-title {
+    @apply font-display text-3xl md:text-4xl font-bold text-brand-white mb-6;
+  }
+
+  .card {
+    @apply bg-brand-grey-dark rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-brand-grey/20;
+  }
+
+  .gradient-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/50 to-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-grey-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-red);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-red-light);
+}

@@ -1,0 +1,87 @@
+{
+  "header": {
+    "home": "Início",
+    "events": "Eventos",
+    "podcast": "Podcast",
+    "blog": "Guias",
+    "about": "Sobre",
+    "subscribe": "Subscrever"
+  },
+  "home": {
+    "tagline": "O Teu Guia Oficial",
+    "title": "WHAT TO DO LISBOA",
+    "description": "Os melhores eventos, restaurantes, experiências e segredos de Lisboa. Tudo o que precisas saber para aproveitar a cidade.",
+    "cta_events": "Ver Agenda da Semana",
+    "cta_podcast": "Ouvir Podcast",
+    "categories": [
+      "Concertos",
+      "Teatro",
+      "Nightlife",
+      "Restaurantes",
+      "Ar Livre",
+      "Arte"
+    ],
+    "featured": {
+      "title": "Destaques da Semana",
+      "subtitle": "Os eventos imperdíveis nos próximos dias.",
+      "view_all": "Ver todos os eventos"
+    }
+  },
+  "events": {
+    "title": "Agenda Cultural",
+    "subtitle": "Os melhores eventos, concertos, exposições e festas em Lisboa para esta semana.",
+    "total": "Total de eventos",
+    "search_placeholder": "Pesquisar eventos (Em breve)"
+  },
+  "blog": {
+    "title": "Guias e Roteiros",
+    "subtitle": "Descubra as nossas curadorias semanais, reviews de restaurantes e roteiros secretos para explorar Lisboa.",
+    "back": "Voltar"
+  },
+  "about": {
+    "title": "Sobre o What To Do - Lisboa",
+    "description": "O teu guia definitivo para descobrir o que fazer em Lisboa. Desde eventos imperdíveis a segredos escondidos, trazemos-te as melhores sugestões para aproveitar a cidade ao máximo.",
+    "sections": {
+      "agenda": {
+        "title": "Agenda Semanal",
+        "description": "Curaçadoria semanal dos melhores concertos, exposições, teatro e festas que acontecem em Lisboa."
+      },
+      "podcast": {
+        "title": "Podcast",
+        "description": "Conversas com personalidades de Lisboa, artistas e empreendedores sobre os seus projetos e a sua visão da cidade."
+      },
+      "guides": {
+        "title": "Guias & Roteiros",
+        "description": "Sugestões de restaurantes, bares, passeios e experiências únicas testadas pela nossa equipa."
+      }
+    },
+    "mission": "A nossa missão",
+    "mission_text": "Lisboa está cheia de vida, mas às vezes é difícil saber por onde começar. O What To Do nasceu para responder à pergunta clássica: \"O que vamos fazer hoje?\".",
+    "mission_detail": "Queremos conectar-te com a cultura vibrante da cidade, apoiar artistas locais e garantir que nunca fiques sem planos para o fim de semana.",
+    "cta_episodes": "Ouvir Episódios",
+    "cta_blog": "Ler Artigos"
+  },
+  "footer": {
+    "description": "Descubra o que fazer através do nosso podcast e blog. Histórias inspiradoras, dicas práticas e entretenimento de qualidade.",
+    "quick_links": "Links Rápidos",
+    "newsletter": "Newsletter",
+    "newsletter_description": "Receba novos episódios e artigos diretamente no seu email.",
+    "copyright": "What To Do - Blog & Podcast. Todos os direitos reservados.",
+    "privacy": "Privacidade",
+    "terms": "Termos"
+  },
+  "subscribe": {
+    "placeholder": "Seu email...",
+    "button": "Subscrever",
+    "success": "Obrigado! Verifica o teu email.",
+    "error": "Erro ao subscrever. Tenta novamente.",
+    "already": "Este email já está subscrito."
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "try_again": "Tenta novamente",
+    "close": "Fechar"
+  }
+}

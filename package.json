@@ -1,0 +1,51 @@
+{
+  "name": "what-to-do-website",
+  "version": "1.0.0",
+  "description": "What To Do - Blog & Podcast Website",
+  "scripts": {
+    "dev": "next dev",
+    "dev:clean": "node scripts/dev-clean.cjs",
+    "dv": "node scripts/dev-clean.cjs",
+    "build": "next build",
+    "start": "next start",
+    "health": "node scripts/health-check.cjs",
+    "lint": "next lint",
+    "fetch:events": "tsx scripts/fetch-events.ts",
+    "enrich:events": "tsx scripts/enrich-events.ts",
+    "test:detections": "node scripts/test-detections.js",
+    "test:parsing": "node scripts/test-parsing.cjs",
+    "quality:events": "node scripts/validate-events-quality.cjs",
+    "verify:events": "node scripts/verify-events.cjs"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "axios": "^1.13.5",
+    "cheerio": "^1.2.0",
+    "critters": "^0.0.23",
+    "date-fns": "^4.1.0",
+    "next": "^16.1.6",
+    "next-intl": "^4.8.3",
+    "playwright": "^1.58.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.71.1",
+    "react-icons": "^5.0.1",
+    "resend": "^6.9.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "uuid": "^13.0.0"
+  }
+}
