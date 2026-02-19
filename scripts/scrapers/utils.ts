@@ -82,13 +82,15 @@ export function extractPriceFromHtml(html: string): string {
 // Lightweight category detection used by scrapers (conservative rules)
 function detectCategoryFromText(text: string): string | undefined {
     const t = (text || '').toLowerCase();
-    if (/(discoteca|nightclub|boate|dj|cabaret|burlesque|stand-up|comedy|vida nocturna|noite)/i.test(t))
+    if (/(discoteca|nightclub|boate|dj|cabaret|burlesque|vida nocturna|noite)/i.test(t))
         return 'Discoteca/Nightlife';
-    if (/(teatro|peça|espetáculo|dramático)/i.test(t)) return 'Teatro';
+    if (/(teatro|peça|espetáculo|dramático|stand-up|stand up|comedy|comédia|humor)/i.test(t)) return 'Teatro';
     if (/(cinema|filme|documentário|projeção)/i.test(t)) return 'Cinema';
-    if (/(concerto|música|show|festival|banda|artista|fado|rock|jazz)/i.test(t)) return 'Música';
+    if (/(concerto|música|show|festival|banda|artista|fado|rock|jazz|techno|house|trance|rave|edm|electronic|eletrónica|drum\s*&\s*bass|dnb|dubstep|hardstyle|psytrance)/i.test(t)) return 'Música';
     if (/(dança|ballet|coreograf|movimento)/i.test(t)) return 'Dança';
     if (/(exposição|mostra|galeria|arte|museu|obra)/i.test(t)) return 'Exposição';
+    if (/(workshop|masterclass|aula prática|hands-on)/i.test(t)) return 'Workshop';
+    if (/(gastronom|degust|degustação|brunch|wine|vinho|cocktail|jantar|dinner|food|chef)/i.test(t)) return 'Gastronomia';
     if (/(palestra|seminário|conferência|talk|workshop|formação|entrevista)/i.test(t)) return 'Conferência';
     if (/(mercado|feira|market|feria|vendas)/i.test(t)) return 'Mercado/Feira';
     if (/(festa|party|carnaval|celebração)/i.test(t)) return 'Festa';
@@ -98,17 +100,43 @@ function detectCategoryFromText(text: string): string | undefined {
 
 function detectMusicGenreFromText(text: string): string | undefined {
     const t = (text || '').toLowerCase();
+    if (/(hardcore|hardcore techno|gabber|angerfist)/i.test(t)) return 'Hardstyle';
+    if (/(drum\s*(?:and|&)\s*bass|\bdnb\b)/i.test(t)) return 'Drum & Bass';
+    if (/(ukg|uk garage|garage)/i.test(t)) return 'UK Garage';
+    if (/(hard\s*techno|hardtechno)/i.test(t)) return 'Hard Techno';
+    if (/melodic\s+techno/i.test(t)) return 'Melodic Techno';
+    if (/industrial\s+techno/i.test(t)) return 'Industrial Techno';
+    if (/(minimal\s+techno|minimal)/i.test(t)) return 'Minimal';
+    if (/(acid\s+techno|acid house|\bacid\b)/i.test(t)) return 'Acid';
+    if (/techno/i.test(t)) return 'Techno';
+    if (/deep\s+house/i.test(t)) return 'Deep House';
+    if (/tech\s+house/i.test(t)) return 'Tech House';
+    if (/progressive\s+house/i.test(t)) return 'Progressive House';
+    if (/afro\s+house/i.test(t)) return 'Afro House';
+    if (/melodic\s+house/i.test(t)) return 'Melodic House';
+    if (/house/i.test(t)) return 'House';
+    if (/(psy\s*trance|psytrance)/i.test(t)) return 'Psytrance';
+    if (/(\bgoa\b|goa\s+trance)/i.test(t)) return 'Goa';
     if (t.includes('fado')) return 'Fado';
+    if (/(metal|heavy metal|thrash|death metal|black metal)/i.test(t)) return 'Metal';
+    if (/punk/i.test(t)) return 'Punk';
+    if (/(emo|indie|alternative)/i.test(t)) return 'Indie/Alternative';
     if (t.includes('rock')) return 'Rock';
     if (t.includes('jazz')) return 'Jazz';
     if (t.includes('pop')) return 'Pop';
-    if (t.includes('hard techno') || t.includes('hardtechno')) return 'Hard Techno';
-    if (t.includes('techno')) return 'Techno';
     if (t.includes('trance')) return 'Trance';
-    if (t.includes('house')) return 'House';
+    if (/(electro|electroclash|electronic)/i.test(t)) return 'Electro';
+    if (/breakbeat/i.test(t)) return 'Breakbeat';
+    if (/dubstep/i.test(t)) return 'Dubstep';
+    if (/hardstyle/i.test(t)) return 'Hardstyle';
+    if (/disco/i.test(t)) return 'Disco';
+    if (/(downtempo|chillout|lofi|ambient)/i.test(t)) return 'Downtempo/Chill';
     if (t.includes('funk')) return 'Funk';
+    if (/(r&b|rnb|neo soul|\bsoul\b)/i.test(t)) return 'R&B/Soul';
     if (/(clássic|orquest|sinfonia|clásico)/i.test(t)) return 'Clássico';
     if (t.includes('reggae')) return 'Reggae';
+    if (/(afrobeats|afrobeat)/i.test(t)) return 'Afrobeats';
+    if (/(salsa|bachata|reggaeton|flamenco|latin|latino|cumbia)/i.test(t)) return 'World/Latin';
     if (/(hip-hop|hiphop|rap)/i.test(t)) return 'Hip-Hop';
     if (/(folk|tradicion|gaita)/i.test(t)) return 'Folk/Tradicional';
     if (/(samba|carnaval|bossa nova)/i.test(t)) return 'Samba/Carnaval';
@@ -155,6 +183,18 @@ export function detectCategoryBySource(params: {
         if (/(food|gastronom|wine|tasting|degust|dinner|brunch)/.test(combined)) return 'Gastronomia';
     }
 
+    if (source === 'Shotgun') {
+        if (/(techno|hard techno|hardtechno|house|deep house|tech house|trance|psytrance|rave|club|warehouse|after|all night)/.test(combined))
+            return 'Discoteca/Nightlife';
+        if (/(festival|live|concert|concerto|showcase|label night)/.test(combined)) return 'Música';
+    }
+
+    if (source === 'Xceed') {
+        if (/(techno|hard techno|hardtechno|house|deep house|tech house|trance|psytrance|rave|club|warehouse|after|all night|guest list|table booking)/.test(combined))
+            return 'Discoteca/Nightlife';
+        if (/(festival|live|concert|concerto|showcase)/.test(combined)) return 'Música';
+    }
+
     return undefined;
 }
 
@@ -167,6 +207,28 @@ export function detectMusicGenreBySource(params: { source: EventSource; text: st
 
     if (source === 'Fever' && /candlelight/.test(combined)) return 'Clássico';
     if (source === 'Eventbrite' && /afrobeats|reggae|salsa|bachata/.test(combined)) return 'World/Latin';
+    if (source === 'Shotgun' && /boiler room|warehouse|all night|after|afterparty/.test(combined)) {
+        if (/(hard\s*techno|hardtechno)/.test(combined)) return 'Hard Techno';
+        if (/techno/.test(combined)) return 'Techno';
+        if (/tech\s*house/.test(combined)) return 'Tech House';
+        if (/deep\s*house/.test(combined)) return 'Deep House';
+        if (/house/.test(combined)) return 'House';
+    }
+    if (source === 'Xceed') {
+        if (/(hard\s*techno|hardtechno)/.test(combined)) return 'Hard Techno';
+        if (/melodic\s*techno/.test(combined)) return 'Melodic Techno';
+        if (/industrial\s*techno/.test(combined)) return 'Industrial Techno';
+        if (/tech\s*house/.test(combined)) return 'Tech House';
+        if (/deep\s*house/.test(combined)) return 'Deep House';
+        if (/afro\s*house/.test(combined)) return 'Afro House';
+        if (/house/.test(combined)) return 'House';
+        if (/techno/.test(combined)) return 'Techno';
+    }
+
+    if (/(all\s*night\s*set|fuse\s*all\s*night|ministerium|warehouse|\bru?mu\b|boiler\s*room)/.test(combined)) return 'Techno';
+    if (/(sonicblast|heavy metal|thrash|death metal|black metal)/.test(combined)) return 'Metal';
+    if (/(emo|indie rock|alternative rock|primavera sound)/.test(combined)) return 'Indie/Alternative';
+    if (/(pub\s*crawl|erasmus|ladies\s*night|shots|french\s*party|boat\s*party|new\s*gang|kalorama|live\s*music)/.test(combined)) return 'Pop';
 
     return undefined;
 }
@@ -189,9 +251,10 @@ export function makeEvent(p: {
     const rawText = `${title} ${description} ${location}`;
     const inferredCategory =
         detectCategoryBySource({ source: p.source, text: rawText, url: p.url }) || detectCategoryFromText(rawText);
+    const canInferMusicGenre = inferredCategory === 'Música' || inferredCategory === 'Discoteca/Nightlife';
     const inferredGenre =
-        inferredCategory === 'Música'
-            ? detectMusicGenreBySource({ source: p.source, text: `${title} ${description}`, url: p.url })
+        canInferMusicGenre
+            ? detectMusicGenreBySource({ source: p.source, text: `${title} ${description}`, url: p.url }) || 'Outro'
             : undefined;
 
     return {

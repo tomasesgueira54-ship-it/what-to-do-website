@@ -110,10 +110,46 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/[locale]/my-agenda/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/[locale]/my-agenda">> = Specific
+  const handler = {} as typeof import("../../app/[locale]/my-agenda/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/[locale]/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/[locale]">> = Specific
   const handler = {} as typeof import("../../app/[locale]/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/[locale]/partners/dashboard/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/[locale]/partners/dashboard">> = Specific
+  const handler = {} as typeof import("../../app/[locale]/partners/dashboard/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/[locale]/partners/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/[locale]/partners">> = Specific
+  const handler = {} as typeof import("../../app/[locale]/partners/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/[locale]/podcast/cantinho-dos-segredos/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/[locale]/podcast/cantinho-dos-segredos">> = Specific
+  const handler = {} as typeof import("../../app/[locale]/podcast/cantinho-dos-segredos/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -200,6 +236,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/my-agenda/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/my-agenda">> = Specific
+  const handler = {} as typeof import("../../app/my-agenda/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/">> = Specific
@@ -213,6 +258,33 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/events">> = Specific
   const handler = {} as typeof import("../../app/api/events/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/outbound/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/outbound">> = Specific
+  const handler = {} as typeof import("../../app/api/outbound/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/partners/export/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/partners/export">> = Specific
+  const handler = {} as typeof import("../../app/api/partners/export/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/promoters/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/promoters">> = Specific
+  const handler = {} as typeof import("../../app/api/promoters/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
@@ -235,6 +307,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends LayoutConfig<"/[locale]">> = Specific
   const handler = {} as typeof import("../../app/[locale]/layout.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/[locale]/podcast/layout.tsx
+{
+  type __IsExpected<Specific extends LayoutConfig<"/[locale]/podcast">> = Specific
+  const handler = {} as typeof import("../../app/[locale]/podcast/layout.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -7,6 +7,13 @@ import { z } from 'zod';
 const subscribers = new Set<string>();
 const requestLog = new Map<string, number[]>();
 
+if (!process.env.DATABASE_URL) {
+    console.warn('[subscribe] ⚠️  DATABASE_URL not set — subscriber emails will NOT be persisted across restarts.');
+}
+if (!process.env.RESEND_API_KEY) {
+    console.warn('[subscribe] ⚠️  RESEND_API_KEY not set — confirmation emails will NOT be sent.');
+}
+
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 10;
 
@@ -101,6 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Subscribe
 
         // Send welcome email via Resend (if API key is available)
         const apiKey = process.env.RESEND_API_KEY;
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@whattodo.pt';
         if (apiKey) {
             const resend = new Resend(apiKey);
 
@@ -140,7 +148,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Subscribe
 
             try {
                 await resend.emails.send({
-                    from: 'noreply@whattodo.pt',
+                    from: fromEmail,
                     to: normalizedEmail,
                     subject: emailSubject,
                     html: emailBody,

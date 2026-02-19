@@ -11,16 +11,46 @@ import { notFound } from "next/navigation";
 import fs from "fs/promises";
 import path from "path";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
+import FavoriteEventButton from "@/components/FavoriteEventButton";
+import { getDisplayLocation, getDisplayPrice } from "@/lib/event-display";
+import type { Metadata } from "next";
+import type { Event } from "@/data/types";
 
-async function getEvent(id: string) {
+export const revalidate = 3600;
+
+async function getEvent(id: string): Promise<Event | null> {
   try {
     const filePath = path.join(process.cwd(), "data", "events.json");
     const fileContent = await fs.readFile(filePath, "utf-8");
-    const events = JSON.parse(fileContent);
-    return events.find((e: any) => e.id === id);
+    const events: Event[] = JSON.parse(fileContent);
+    return events.find((e) => e.id === id) ?? null;
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale: localeParam, id } = await params;
+  const locale: Locale = locales.includes(localeParam as Locale)
+    ? (localeParam as Locale)
+    : defaultLocale;
+  const event = await getEvent(id);
+  if (!event) return {};
+  return {
+    title: `${event.title} — What To Do Lisboa`,
+    description: event.description?.slice(0, 160) || `${event.title} em ${event.location}`,
+    openGraph: {
+      title: event.title,
+      description: event.description?.slice(0, 160),
+      images: event.image ? [{ url: event.image }] : [],
+      type: "website",
+      locale: locale === "pt" ? "pt_PT" : "en_US",
+    },
+  };
 }
 
 export default async function EventPage({
@@ -50,14 +80,21 @@ export default async function EventPage({
     hour: "2-digit",
     minute: "2-digit",
   });
-  const normalizedPrice =
-    event.price || (isPt ? "Preço indisponível" : "Price unavailable");
+  const normalizedPrice = getDisplayPrice(event.price, event.description, isPt);
+  const normalizedLocation = getDisplayLocation(
+    event.location,
+    event.description,
+    isPt,
+  );
   const endDateStr = event.endDate
     ? new Date(event.endDate).toLocaleDateString(dateLocale, {
         day: "numeric",
         month: "long",
         year: "numeric",
       })
+    : null;
+  const trackedExternalUrl = event.url
+    ? `/api/outbound?target=${encodeURIComponent(event.url)}&eventId=${encodeURIComponent(event.id)}&source=${encodeURIComponent(event.source || "unknown")}&locale=${encodeURIComponent(locale)}`
     : null;
 
   return (
@@ -118,7 +155,7 @@ export default async function EventPage({
                 )}
                 <div className="flex items-center gap-3 text-lg">
                   <FaMapMarkerAlt className="text-brand-red" />
-                  <span>{event.location}</span>
+                  <span>{normalizedLocation}</span>
                 </div>
                 <div className="flex items-center gap-3 text-lg">
                   <FaTicketAlt className="text-brand-red" />
@@ -141,15 +178,17 @@ export default async function EventPage({
                 <h3 className="font-bold text-xl mb-4">
                   {isPt ? "Bilhetes e Info" : "Tickets & Info"}
                 </h3>
-                {event.url ? (
-                  <Link
-                    href={event.url}
+                <FavoriteEventButton eventId={event.id} locale={locale} />
+                {trackedExternalUrl ? (
+                  <a
+                    href={trackedExternalUrl}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="btn-primary w-full flex items-center justify-center gap-2 mb-3 px-4 py-3 bg-brand-red hover:bg-red-700 text-white font-bold rounded shadow transition-all transform hover:scale-105"
                   >
                     {isPt ? "Comprar Bilhetes" : "Buy Tickets"}{" "}
                     <FaExternalLinkAlt size={14} />
-                  </Link>
+                  </a>
                 ) : (
                   <button
                     className="btn-primary w-full opacity-50 cursor-not-allowed px-4 py-3 bg-gray-600 rounded"

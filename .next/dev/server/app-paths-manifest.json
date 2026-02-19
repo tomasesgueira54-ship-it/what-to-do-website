@@ -1,1 +1,6 @@
-{}
+{
+  "/[locale]/episodes/[id]/page": "app/[locale]/episodes/[id]/page.js",
+  "/[locale]/episodes/page": "app/[locale]/episodes/page.js",
+  "/[locale]/page": "app/[locale]/page.js",
+  "/_not-found/page": "app/_not-found/page.js"
+}

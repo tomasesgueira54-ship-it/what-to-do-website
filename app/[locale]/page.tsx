@@ -62,7 +62,7 @@ export default async function Home({ params }: HomePageProps) {
           : "The best city views paired with incredible cocktails.",
       readTime: "5 min",
       publishDate: "10 Mar 2026",
-      imageUrl: "/images/blog-rooftop.jpg",
+      imageUrl: "/images/placeholder-card.svg",
       category: locale === "pt" ? "Lifestyle" : "Lifestyle",
     },
   ];
@@ -105,12 +105,13 @@ export default async function Home({ params }: HomePageProps) {
 
           <div className="mt-16 flex flex-wrap justify-center gap-4 opacity-80">
             {t.home.categories.map((cat: string) => (
-              <span
+              <Link
                 key={cat}
-                className="px-4 py-2 rounded-lg bg-brand-grey-dark/30 border border-brand-grey-dark/50 text-brand-grey hover:text-white hover:border-brand-red/50 transition-colors cursor-pointer text-sm"
+                href={`/${locale}/events?q=${encodeURIComponent(cat)}`}
+                className="px-4 py-2 rounded-lg bg-brand-grey-dark/30 border border-brand-grey-dark/50 text-brand-grey hover:text-white hover:border-brand-red/50 transition-colors text-sm"
               >
                 {cat}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -136,13 +137,23 @@ export default async function Home({ params }: HomePageProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredEvents.map((event) => (
-              <div key={event.id}>
-                <EventCard event={event} locale={locale} />
+              <div key={event.id} className="h-full">
+                <Link
+                  href={`/${locale}/events/${event.id}`}
+                  className="block h-full hover:scale-[1.02] transition-transform"
+                >
+                  <EventCard event={event} locale={locale} />
+                </Link>
               </div>
             ))}
             {upcomingEvents.map((event) => (
-              <div key={event.id}>
-                <EventCard event={event} locale={locale} />
+              <div key={event.id} className="h-full">
+                <Link
+                  href={`/${locale}/events/${event.id}`}
+                  className="block h-full hover:scale-[1.02] transition-transform"
+                >
+                  <EventCard event={event} locale={locale} />
+                </Link>
               </div>
             ))}
           </div>
@@ -171,18 +182,6 @@ export default async function Home({ params }: HomePageProps) {
               : "Get new episodes, guides and events delivered to your inbox."}
           </p>
           <SubscribeForm locale={locale} />
-        </div>
-      </section>
-
-      {/* Footer info */}
-      <section className="py-20 bg-brand-black-light">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-display font-bold mb-4"> What To Do</h2>
-          <p className="text-brand-grey-light max-w-2xl mx-auto">
-            {locale === "pt"
-              ? "Mantém-te atualizado com os melhores eventos e experiências de Lisboa!"
-              : "Stay updated with the best events and experiences in Lisbon!"}
-          </p>
         </div>
       </section>
     </>

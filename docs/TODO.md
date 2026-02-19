@@ -1,11 +1,23 @@
 # TODO & Backlog — What To Do Website
 
 **Maintainer:** GitHub Copilot
-**Last updated:** 2026-02-16
+**Last updated:** 2026-02-18
 
 ---
 
 ## Critical (must do now) ✅
+
+- [ ] Criar ficheiro `.env.local` com as seguintes variáveis de ambiente:
+  ```
+  RESEND_API_KEY=re_xxxx
+  DATABASE_URL=postgresql://...
+  NEXT_PUBLIC_SITE_URL=https://whattodo.pt
+  PARTNERS_DASHBOARD_TOKEN=token_secreto
+  ```
+  - `RESEND_API_KEY` — obrigatório para envio de newsletters (`app/api/subscribe/route.ts`)
+  - `DATABASE_URL` — sem esta var, os subscritores são perdidos ao reiniciar o servidor (apenas memória)
+  - `NEXT_PUBLIC_SITE_URL` — usado em SEO, sitemap e Open Graph
+  - `PARTNERS_DASHBOARD_TOKEN` — protege o acesso ao dashboard de parceiros
 
 - [ ] Configure repository secrets
   - RESEND_API_KEY — required for newsletter sends (`app/api/subscribe/route.ts`)

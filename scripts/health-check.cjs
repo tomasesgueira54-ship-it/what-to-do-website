@@ -34,10 +34,22 @@ async function probe(url, timeout = 1500) {
     });
 }
 
+async function waitForServer(url, maxAttempts = 30, delayMs = 1000) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const up = await probe(url).catch(() => false);
+        if (up) return true;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    return false;
+}
+
 (async function main() {
     const envBase = process.env.BASE_URL;
     let base = envBase || 'http://localhost:3000';
     const alt = 'http://localhost:3001';
+    const managedPort = Number(process.env.HEALTH_SERVER_PORT || 3001);
+    const managedBase = `http://localhost:${managedPort}`;
+    let managedServer = null;
 
     const okBase = await probe(base).catch(() => false);
     if (!okBase) {
@@ -47,13 +59,6 @@ async function probe(url, timeout = 1500) {
 
     console.log(`Using BASE_URL=${base}`);
 
-    // Check server reachable before running runtime tests
-    const serverUp = await probe(base).catch(() => false);
-    if (!serverUp) {
-        console.error(`No running dev server detected at ${base}. Start it with 'npm run dv' or set BASE_URL to a running instance.`);
-        process.exit(2);
-    }
-
     const results = [];
 
     console.log('\n1) Running events quality gate (coverage + semantic subtitle checks)');
@@ -62,20 +67,48 @@ async function probe(url, timeout = 1500) {
     console.log('\n2) Running build (next build)');
     results.push({ name: 'build', code: await run('npm', ['run', 'build']) });
 
+    let runtimeBase = base;
+    const runtimeServerUp = await probe(runtimeBase).catch(() => false);
+    if (!runtimeServerUp) {
+        console.log(`\nNo server available at ${runtimeBase}. Starting managed production server on ${managedBase} ...`);
+        managedServer = spawn('npm', ['run', 'start', '--', '--port', String(managedPort)], {
+            stdio: 'inherit',
+            shell: process.platform === 'win32',
+            env: { ...process.env, NODE_ENV: 'production' },
+        });
+
+        const up = await waitForServer(managedBase);
+        if (!up) {
+            console.error(`Managed server did not become ready at ${managedBase}.`);
+            try { managedServer.kill(); } catch (e) { }
+            process.exit(2);
+        }
+
+        runtimeBase = managedBase;
+    }
+
     console.log('\n3) Running site audit (Playwright crawl)');
-    results.push({ name: 'audit', code: await run('node', ['scripts/audit-links-playwright.cjs'], { env: { ...process.env, BASE_URL: base, MAX_PAGES: process.env.MAX_PAGES || '120' } }) });
+    results.push({ name: 'audit', code: await run('node', ['scripts/audit-links-playwright.cjs'], { env: { ...process.env, BASE_URL: runtimeBase, MAX_PAGES: process.env.MAX_PAGES || '500', EVENT_SEED_COUNT: process.env.EVENT_SEED_COUNT || '200' } }) });
 
     console.log('\n4) Running subscribe form test (Playwright)');
-    results.push({ name: 'subscribe-test', code: await run('node', ['scripts/playwright-subscribe-test.cjs'], { env: { ...process.env, BASE_URL: base } }) });
+    results.push({ name: 'subscribe-test', code: await run('node', ['scripts/playwright-subscribe-test.cjs'], { env: { ...process.env, BASE_URL: runtimeBase } }) });
 
     console.log('\n5) Running image optimizer checks');
-    results.push({ name: 'image-opt', code: await run('node', ['scripts/check-image-opt.cjs'], { env: { ...process.env, BASE_URL: base } }) });
+    results.push({ name: 'image-opt', code: await run('node', ['scripts/check-image-opt.cjs'], { env: { ...process.env, BASE_URL: runtimeBase } }) });
 
     console.log('\nSummary:');
     let failed = 0;
     for (const r of results) {
         console.log(` - ${r.name}: ${r.code === 0 ? 'OK' : 'FAIL (code ' + r.code + ')'}`);
         if (r.code !== 0) failed++;
+    }
+
+    if (managedServer) {
+        try {
+            managedServer.kill();
+        } catch (e) {
+            // best effort cleanup
+        }
     }
 
     process.exit(failed === 0 ? 0 : 1);

@@ -3,6 +3,30 @@ import { FaArrowLeft, FaClock } from "react-icons/fa";
 import { blogPosts } from "@/data/blog";
 import { notFound } from "next/navigation";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
+import type { Metadata } from "next";
+
+export async function generateStaticParams() {
+  return locales.flatMap((locale) =>
+    blogPosts.map((post) => ({ locale, id: post.id })),
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale: localeParam, id } = await params;
+  const locale: Locale = locales.includes(localeParam as Locale)
+    ? (localeParam as Locale)
+    : defaultLocale;
+  const post = blogPosts.find((item) => item.id === id);
+  if (!post) return {};
+  return {
+    title: `${locale === "pt" ? post.titlePt : post.titleEn} — What To Do Blog`,
+    description: locale === "pt" ? post.excerptPt : post.excerptEn,
+  };
+}
 
 export default async function BlogPostPage({
   params,
@@ -22,6 +46,7 @@ export default async function BlogPostPage({
 
   const title = isPt ? post.titlePt : post.titleEn;
   const excerpt = isPt ? post.excerptPt : post.excerptEn;
+  const content = isPt ? post.contentPt : post.contentEn;
   const category = isPt ? post.categoryPt : post.categoryEn;
 
   return (
@@ -52,12 +77,21 @@ export default async function BlogPostPage({
         </header>
 
         <article className="prose prose-invert max-w-none">
-          <p className="text-brand-grey mb-4">{excerpt}</p>
-          <p className="text-brand-grey">
-            {isPt
-              ? "Artigo completo em atualização. Volte em breve para conteúdo expandido."
-              : "Full article is being updated. Please check back soon for expanded content."}
-          </p>
+          <p className="text-brand-grey text-lg leading-relaxed mb-6">{excerpt}</p>
+          {content ? (
+            <div className="space-y-5">
+              {content.split("\n\n").map((paragraph, i) => (
+                <p key={i} className="text-brand-grey leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: paragraph.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-brand-grey">
+              {isPt
+                ? "Artigo completo em breve."
+                : "Full article coming soon."}
+            </p>
+          )}
         </article>
       </div>
     </section>

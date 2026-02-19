@@ -2,6 +2,7 @@ export type EventSource =
     | 'Agenda LX'
     | 'Fever'
     | 'Shotgun'
+    | 'Xceed'
     | 'Ticketline'
     | 'Eventbrite'
     | 'Meetup'

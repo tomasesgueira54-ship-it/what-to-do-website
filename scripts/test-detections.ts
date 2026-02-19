@@ -42,6 +42,12 @@ const cases: Case[] = [
         title: 'Taste of Lisbon — wine tasting',
         expectedCategory: 'Gastronomia',
     },
+    {
+        source: 'Shotgun',
+        title: 'Warehouse Rave: Hard Techno All Night',
+        expectedCategory: 'Discoteca/Nightlife',
+        expectedGenre: 'Hard Techno',
+    },
 ];
 
 let failed = 0;

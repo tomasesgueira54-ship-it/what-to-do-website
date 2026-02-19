@@ -1,1 +1,11 @@
-[00:00:02.000] Server  LOG     ✓ Ready in 1237ms
+[00:00:01.958] Server  LOG     ✓ Ready in 1478ms
+[00:00:05.214] Server  LOG     ○ Compiling /[locale] ...
+[00:00:07.541] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:07.824] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:15.562] Browser WARN    Playback unavailable for current source
+[00:00:16.633] Browser WARN    Playback unavailable for current source
+[00:00:22.907] Browser WARN    Playback unavailable for current source
+[00:00:24.156] Browser WARN    Playback unavailable for current source
+[00:02:32.854] Server  LOG     ✓ Compiled in 124ms
+[00:03:25.367] Server  LOG     ✓ Compiled in 134ms
+[00:03:32.080] Server  LOG     ✓ Compiled in 145ms

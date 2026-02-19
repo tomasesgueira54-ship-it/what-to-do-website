@@ -1,6 +1,0 @@
-1:"$Sreact.fragment"
-2:I[22016,["/_next/static/chunks/f1852fa30f66efb7.js","/_next/static/chunks/51bafe363843490f.js","/_next/static/chunks/8db86f67232f5687.js","/_next/static/chunks/042f427ca96ee3ef.js"],""]
-3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/d2be314c3ece3fbe.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"buildId":"8IphVOVOvg1IX1PZZ0VM4","rsc":["$","$1","c",{"children":[["$","section",null,{"className":"py-16","children":["$","div",null,{"className":"container mx-auto px-4 max-w-3xl","children":[["$","h1",null,{"className":"font-display text-4xl font-bold mb-6 text-brand-red","children":"Termos e Condições"}],["$","p",null,{"className":"text-brand-grey mb-6","children":"Ao usar este website, concorda com utilização responsável do conteúdo e serviços."}],["$","div",null,{"className":"space-y-4 text-brand-grey-light","children":[["$","p",null,{"children":"As informações de eventos podem mudar; confirme sempre no site oficial."}],["$","p",null,{"children":"Reservamo-nos o direito de atualizar estes termos sem aviso prévio."}]]}],["$","$L2",null,{"href":"/pt","className":"inline-block mt-8 text-brand-red hover:text-white transition-colors","children":"Voltar ao início"}]]}]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
-5:null

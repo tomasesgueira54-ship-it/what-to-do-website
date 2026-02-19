@@ -12,7 +12,7 @@ interface EpisodeCardProps {
     title: string;
     description: string;
     duration?: string;
-    publishDate: string;
+    publishDate?: string;
     imageUrl?: string;
     audioUrl?: string; // Optional for listing, but good if we want to play directly
   };
@@ -26,7 +26,8 @@ export default function EpisodeCard({
   const labels = {
     nowPlaying: locale === "pt" ? "A TOCAR AGORA..." : "PLAYING NOW...",
     paused: locale === "pt" ? "PAUSADO" : "PAUSED",
-    minutesFallback: locale === "pt" ? "?? min" : "?? min",
+    audioUnavailable:
+      locale === "pt" ? "Áudio indisponível" : "Audio unavailable",
   };
 
   // We need an audioUrl to play. If it's missing in props (like in a list view),
@@ -36,16 +37,18 @@ export default function EpisodeCard({
   // Mocking audioUrl if not present for the card pattern to work with play button
   const episodeWithAudio = {
     ...episode,
-    audioUrl: episode.audioUrl || `/audio/episode-${episode.id}.mp3`, // Fallback convention
+    audioUrl: episode.audioUrl || "",
   };
+  const hasPlayableAudio = /\.(mp3|wav|ogg|m4a|aac|webm)(\?.*)?$/i.test(
+    episodeWithAudio.audioUrl,
+  );
 
   const isCurrent = currentEpisode?.id === episode.id;
   const isActuallyPlaying = isCurrent && isPlaying;
-  const imageSrc = episode.imageUrl?.startsWith("/images/")
-    ? "/images/placeholder-card.svg"
-    : episode.imageUrl;
+  const imageSrc = episode.imageUrl || "/images/placeholder-card.svg";
 
   const handlePlay = (e: React.MouseEvent) => {
+    if (!hasPlayableAudio) return;
     e.preventDefault(); // Prevent navigation
     if (isCurrent) {
       togglePlay();
@@ -69,13 +72,22 @@ export default function EpisodeCard({
           )}
           <div className="absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all" />
           <div className="gradient-overlay" />
-          <div className="absolute bottom-4 left-4 flex items-center space-x-2 text-sm z-10">
-            <FaClock className="text-brand-red" />
-            <span>{episode.duration || labels.minutesFallback}</span>
-          </div>
+          {episode.duration && (
+            <div className="absolute bottom-4 left-4 flex items-center space-x-2 text-sm z-10">
+              <FaClock className="text-brand-red" />
+              <span>{episode.duration}</span>
+            </div>
+          )}
         </div>
 
         <div className="p-6">
+          {!hasPlayableAudio && (
+            <div className="mb-2">
+              <span className="text-xs font-bold text-brand-grey uppercase tracking-wide">
+                {labels.audioUnavailable}
+              </span>
+            </div>
+          )}
           {isCurrent && (
             <div className="mb-2">
               <span className="text-xs font-bold text-brand-red animate-pulse">
@@ -83,7 +95,11 @@ export default function EpisodeCard({
               </span>
             </div>
           )}
-          <p className="text-brand-grey text-sm mb-2">{episode.publishDate}</p>
+          {episode.publishDate && (
+            <p className="text-brand-grey text-sm mb-2">
+              {episode.publishDate}
+            </p>
+          )}
           <h3 className="font-display text-xl font-bold mb-2 group-hover:text-brand-red transition-colors">
             {episode.title}
           </h3>
@@ -91,27 +107,33 @@ export default function EpisodeCard({
         </div>
       </Link>
 
-      <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-        <button
-          onClick={handlePlay}
-          aria-label={
-            isActuallyPlaying
-              ? locale === "pt"
-                ? "Pausar episódio"
-                : "Pause episode"
-              : locale === "pt"
-                ? "Reproduzir episódio"
-                : "Play episode"
-          }
-          className={`pointer-events-auto bg-brand-red rounded-full p-4 transition-all duration-300 transform hover:scale-110 hover:bg-brand-red-light focus:outline-none ${isActuallyPlaying ? "opacity-100 scale-100" : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"}`}
-        >
-          {isActuallyPlaying ? (
-            <FaPause className="text-2xl text-white" />
-          ) : (
-            <FaPlay className="text-2xl text-white ml-1" />
-          )}
-        </button>
-      </div>
+      {hasPlayableAudio && (
+        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+          <button
+            onClick={handlePlay}
+            aria-label={
+              isActuallyPlaying
+                ? locale === "pt"
+                  ? "Pausar episódio"
+                  : "Pause episode"
+                : locale === "pt"
+                  ? "Reproduzir episódio"
+                  : "Play episode"
+            }
+            className={`pointer-events-auto bg-brand-red rounded-full p-4 transition-all duration-300 transform hover:scale-110 hover:bg-brand-red-light focus:outline-none ${
+              isActuallyPlaying
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100"
+            }`}
+          >
+            {isActuallyPlaying ? (
+              <FaPause className="text-2xl text-white" />
+            ) : (
+              <FaPlay className="text-2xl text-white ml-1" />
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

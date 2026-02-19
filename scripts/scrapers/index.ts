@@ -1,6 +1,7 @@
 export * from './agendalx';
 export * from './fever';
 export * from './shotgun';
+export * from './xceed';
 export * from './ticketline';
 export * from './eventbrite';
 export * from './meetup';

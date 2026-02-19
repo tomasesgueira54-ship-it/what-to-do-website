@@ -8,16 +8,14 @@ const translations = {
   pt: {
     title: "Podcast",
     subtitle: "Histórias, dicas e conversas sobre o que fazer em Lisboa",
-    latestEpisode: "Último Episódio",
-    otherEpisodes: "Outros Episódios",
+    episodes: "Episódios",
     back: "Voltar",
     noEpisodes: "Nenhum episódio disponível",
   },
   en: {
     title: "Podcast",
     subtitle: "Stories, tips and conversations about what to do in Lisbon",
-    latestEpisode: "Latest Episode",
-    otherEpisodes: "Other Episodes",
+    episodes: "Episodes",
     back: "Back",
     noEpisodes: "No episodes available",
   },
@@ -52,8 +50,12 @@ export default async function EpisodesPage({
     );
   }
 
-  const latestEpisode = episodes[0];
-  const otherEpisodes = episodes.slice(1);
+  const sortedEpisodes = [...episodes].sort((a, b) => {
+    const bId = Number(b.id);
+    const aId = Number(a.id);
+    if (Number.isFinite(bId) && Number.isFinite(aId)) return bId - aId;
+    return b.id.localeCompare(a.id);
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -68,27 +70,16 @@ export default async function EpisodesPage({
         <p className="text-brand-grey text-lg">{t.subtitle}</p>
       </div>
 
-      {/* Latest Episode */}
-      <div className="mb-16 pb-8 border-b border-brand-grey/20">
+      <div>
         <h2 className="text-2xl font-bold font-display mb-6 text-brand-red">
-          {t.latestEpisode}
+          {t.episodes}
         </h2>
-        <EpisodeCard episode={latestEpisode} locale={locale} />
-      </div>
-
-      {/* Other Episodes */}
-      {otherEpisodes.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold font-display mb-6 text-brand-red">
-            {t.otherEpisodes}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherEpisodes.map((episode) => (
-              <EpisodeCard key={episode.id} episode={episode} locale={locale} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedEpisodes.map((episode) => (
+            <EpisodeCard key={episode.id} episode={episode} locale={locale} />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

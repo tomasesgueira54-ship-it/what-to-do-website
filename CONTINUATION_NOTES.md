@@ -5,6 +5,29 @@
 
 ---
 
+## 📋 DECISÕES TOMADAS
+
+### Domain Registrar Strategy (Feb 19, 2026)
+- **Escolha:** Porkbun (registrador)
+- **Razão:** Custo inferior em renovação comparado a Hostinger
+- **Strategy:**
+  - Manter domínio atual (what-to-do.com) na Hostinger
+  - Transferir para Porkbun na próxima renovação (quando expirar)
+  - Apontar DNS para Vercel nameservers (zero hosting cost)
+  - Supabase para database (500MB free tier)
+  - Resend para email (100 emails/dia free)
+- **Custo Total:** ~€8-10/ano (domínio Porkbun) + €0 (hosting Vercel)
+
+### Todo List - Próximos Passos:
+- [ ] Verificar preços de renovação: Porkbun vs. Hostinger
+- [ ] Quando expirar domínio em Hostinger: transferir para Porkbun
+- [ ] Configurar domínio no Resend (noreply@mail.what-to-do.com)
+- [ ] Adicionar variáveis ao Vercel (RESEND_API_KEY, DATABASE_URL, PARTNERS_DASHBOARD_TOKEN)
+- [ ] Deploy em produção: `vercel --prod`
+- [ ] Validação smoke test pós-deploy
+
+---
+
 ## ✅ MUDANÇAS REALIZADAS
 
 ### 1. **API de Busca & Filtros (Novo)**

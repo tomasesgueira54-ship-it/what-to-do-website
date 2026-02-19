@@ -1,7 +1,10 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3010';
-const MAX_PAGES = Number(process.env.MAX_PAGES || 120);
+const MAX_PAGES = Number(process.env.MAX_PAGES || 500);
+const EVENT_SEED_COUNT = Number(process.env.EVENT_SEED_COUNT || 200);
 const START_PATHS = [
     '/pt',
     '/en',
@@ -23,6 +26,31 @@ const START_PATHS = [
     '/blog',
     '/about',
 ];
+
+function loadEventSeedPaths() {
+    const eventsFilePath = path.join(process.cwd(), 'data', 'events.json');
+    if (!fs.existsSync(eventsFilePath)) return [];
+
+    try {
+        const parsed = JSON.parse(fs.readFileSync(eventsFilePath, 'utf8'));
+        if (!Array.isArray(parsed)) return [];
+
+        const ids = parsed
+            .map((event) => event?.id)
+            .filter(Boolean)
+            .slice(0, EVENT_SEED_COUNT);
+
+        const seededPaths = [];
+        for (const id of ids) {
+            seededPaths.push(`/pt/events/${id}`);
+            seededPaths.push(`/en/events/${id}`);
+        }
+
+        return seededPaths;
+    } catch {
+        return [];
+    }
+}
 
 function normalizePath(href) {
     if (!href) return null;
@@ -52,7 +80,7 @@ function normalizePath(href) {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    const queue = [...new Set(START_PATHS)];
+    const queue = [...new Set([...START_PATHS, ...loadEventSeedPaths()])];
     const visited = new Set();
     const discovered = new Set(queue);
     const issues = [];
@@ -74,6 +102,18 @@ function normalizePath(href) {
             const requestUrl = request.url();
 
             if (errorText.includes('ERR_ABORTED') && requestUrl.includes('_rsc=')) {
+                return;
+            }
+
+            if (errorText.includes('ERR_ABORTED') && /\.mp4(\?|$)/i.test(requestUrl)) {
+                return;
+            }
+
+            if (errorText.includes('ERR_ABORTED') && /https?:\/\/(www\.)?youtube\.com\//i.test(requestUrl)) {
+                return;
+            }
+
+            if (errorText.includes('ERR_ABORTED') && /https?:\/\/youtubei\.googleapis\.com\//i.test(requestUrl)) {
                 return;
             }
 

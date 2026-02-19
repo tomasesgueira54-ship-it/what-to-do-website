@@ -12,9 +12,13 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature();
-'use client';
+"use client";
 ;
 const AudioContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createContext"])(undefined);
+function hasPlayableAudioSource(source) {
+    if (!source) return false;
+    return /\.(mp3|wav|ogg|m4a|aac|webm)(\?.*)?$/i.test(source);
+}
 function AudioProvider({ children }) {
     _s();
     const [currentEpisode, setCurrentEpisode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
@@ -38,14 +42,14 @@ function AudioProvider({ children }) {
             const handleEnded = {
                 "AudioProvider.useEffect.handleEnded": ()=>setIsPlaying(false)
             }["AudioProvider.useEffect.handleEnded"];
-            audio.addEventListener('timeupdate', handleTimeUpdate);
-            audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-            audio.addEventListener('ended', handleEnded);
+            audio.addEventListener("timeupdate", handleTimeUpdate);
+            audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+            audio.addEventListener("ended", handleEnded);
             return ({
                 "AudioProvider.useEffect": ()=>{
-                    audio.removeEventListener('timeupdate', handleTimeUpdate);
-                    audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-                    audio.removeEventListener('ended', handleEnded);
+                    audio.removeEventListener("timeupdate", handleTimeUpdate);
+                    audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+                    audio.removeEventListener("ended", handleEnded);
                 }
             })["AudioProvider.useEffect"];
         }
@@ -54,7 +58,7 @@ function AudioProvider({ children }) {
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AudioProvider.useEffect": ()=>{
             const audio = audioRef.current;
-            if (!audio || !currentEpisode) return;
+            if (!audio || !currentEpisode || !hasPlayableAudioSource(currentEpisode.audioUrl)) return;
             // If source changed, update it
             // Store current src to compare? Alternatively compare episode IDs
             // But HTMLAudioElement.src is absolute path, let's just coordinate carefully.
@@ -62,7 +66,7 @@ function AudioProvider({ children }) {
             if (isPlaying) {
                 audio.play().catch({
                     "AudioProvider.useEffect": (e)=>{
-                        console.error("Playback failed:", e);
+                        console.warn("Playback unavailable for current source");
                         setIsPlaying(false);
                     }
                 }["AudioProvider.useEffect"]);
@@ -77,6 +81,11 @@ function AudioProvider({ children }) {
     const playEpisode = (episode)=>{
         const audio = audioRef.current;
         if (!audio) return;
+        if (!hasPlayableAudioSource(episode.audioUrl)) {
+            setCurrentEpisode(episode);
+            setIsPlaying(false);
+            return;
+        }
         // If it's a new episode
         if (currentEpisode?.id !== episode.id) {
             audio.src = episode.audioUrl;
@@ -122,7 +131,7 @@ function AudioProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/context/AudioContext.tsx",
-        lineNumber: 119,
+        lineNumber: 141,
         columnNumber: 5
     }, this);
 }
@@ -132,7 +141,7 @@ function useAudio() {
     _s1();
     const context = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useContext"])(AudioContext);
     if (context === undefined) {
-        throw new Error('useAudio must be used within an AudioProvider');
+        throw new Error("useAudio must be used within an AudioProvider");
     }
     return context;
 }

@@ -1,11 +1,11 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
 interface EpisodePageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default function EpisodePage({ params }: EpisodePageProps) {
-  redirect(`/pt/episodes/${params.id}`)
+  redirect(`/pt/episodes/${params.id}`);
 }

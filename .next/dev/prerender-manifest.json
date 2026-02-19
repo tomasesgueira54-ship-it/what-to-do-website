@@ -1,11 +1,1 @@
-{
-  "version": 4,
-  "routes": {},
-  "dynamicRoutes": {},
-  "notFoundRoutes": [],
-  "preview": {
-    "previewModeId": "6e332267d6996bdbede3fef640276c4c",
-    "previewModeSigningKey": "ae7fa41e9ffe904d41b9427ecf3fee596e955a6b353fb51ad6c007b98ee16bd1",
-    "previewModeEncryptionKey": "73ece61028d9e5fbeba600abef3ec0802cd8c0ed8129aa37014849efa144f54b"
-  }
-}
+{"version":4,"routes":{"/pt":{},"/en":{},"/pt/episodes":{},"/en/episodes":{},"/pt/episodes/1":{},"/pt/episodes/2":{},"/pt/episodes/3":{},"/en/episodes/1":{},"/en/episodes/2":{},"/en/episodes/3":{}},"dynamicRoutes":{"/[locale]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/[locale]","routeRegex":"^\\/([^/]+?)(?:\\/)?$","allowHeader":[]},"/[locale]/episodes":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/[locale]/episodes","routeRegex":"^\\/([^/]+?)\\/episodes(?:\\/)?$","allowHeader":[]},"/[locale]/episodes/[id]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/[locale]/episodes/[id]","routeRegex":"^\\/([^/]+?)\\/episodes\\/([^/]+?)(?:\\/)?$","allowHeader":[]}},"notFoundRoutes":[],"preview":{"previewModeId":"9a725dbe6f0037339ca64450178fb8ec","previewModeSigningKey":"1bd14e76431774178eb189ce0bc903d61f5afef0e638b214e55b7f4344f84a45","previewModeEncryptionKey":"8cf6a27383fbc129892858c75c6536e192b6aad00570136d77f88593f97cea79"}}

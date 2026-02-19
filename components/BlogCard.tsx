@@ -17,9 +17,7 @@ interface BlogCardProps {
 
 export default function BlogCard({ post, locale = "pt" }: BlogCardProps) {
   const readMore = locale === "pt" ? "Ler mais" : "Read more";
-  const imageSrc = post.imageUrl?.startsWith("/images/")
-    ? "/images/placeholder-card.svg"
-    : post.imageUrl;
+  const imageSrc = post.imageUrl || "/images/placeholder-card.svg";
 
   return (
     <article className="card group">

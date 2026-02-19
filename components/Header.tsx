@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaBars, FaTimes, FaPodcast } from "react-icons/fa";
+import { useTranslations } from "@/lib/use-translations";
 
 interface HeaderProps {
   locale?: "pt" | "en";
@@ -12,6 +13,7 @@ interface HeaderProps {
 export default function Header({ locale = "pt" }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const t = useTranslations(locale);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -35,13 +37,21 @@ export default function Header({ locale = "pt" }: HeaderProps) {
   };
 
   const menuItems = [
-    { name: locale === "pt" ? "Eventos" : "Events", href: `/${locale}/events` },
+    { name: t("header.events", "Events"), href: `/${locale}/events` },
     {
-      name: locale === "pt" ? "Podcast" : "Podcast",
+      name: t("header.my_agenda", "My Agenda"),
+      href: `/${locale}/my-agenda`,
+    },
+    {
+      name: t("header.partners", "Partners"),
+      href: `/${locale}/partners`,
+    },
+    {
+      name: t("header.podcast", "Podcast"),
       href: `/${locale}/episodes`,
     },
-    { name: locale === "pt" ? "Guias" : "Guides", href: `/${locale}/blog` },
-    { name: locale === "pt" ? "Sobre" : "About", href: `/${locale}/about` },
+    { name: t("header.blog", "Guides"), href: `/${locale}/blog` },
+    { name: t("header.about", "About"), href: `/${locale}/about` },
   ];
 
   return (
@@ -97,7 +107,7 @@ export default function Header({ locale = "pt" }: HeaderProps) {
             {/* Subscribe Button */}
             <div>
               <a href={`/${locale}#subscribe`} className="btn-primary">
-                {locale === "pt" ? "Subscrever" : "Subscribe"}
+                {t("header.subscribe", "Subscribe")}
               </a>
             </div>
           </div>
@@ -106,14 +116,12 @@ export default function Header({ locale = "pt" }: HeaderProps) {
           <button
             onClick={toggleMenu}
             className="md:hidden text-white text-2xl focus:outline-none"
-            aria-label="Toggle menu"
+            aria-label={t("header.toggle_menu", "Toggle menu")}
             aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
-
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4">
             {/* Language Switcher Mobile */}
@@ -151,7 +159,7 @@ export default function Header({ locale = "pt" }: HeaderProps) {
                   className="btn-primary w-full block text-center"
                   onClick={toggleMenu}
                 >
-                  {locale === "pt" ? "Subscrever" : "Subscribe"}
+                  {t("header.subscribe", "Subscribe")}
                 </a>
               </li>
             </ul>

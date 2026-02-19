@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import EventCard from "@/components/EventCard";
-import { Event, EventCategory, MusicGenre } from "@/data/types";
+import { Event, EventCategory, EventSource, MusicGenre } from "@/data/types";
+import { useFavorites } from "@/lib/use-favorites";
+import { useTranslations } from "@/lib/use-translations";
 import {
   FaCalendarAlt,
   FaSearch,
@@ -11,11 +14,25 @@ import {
   FaTimes,
   FaTag,
   FaCheck,
+  FaMapMarkedAlt,
+  FaList,
+  FaHeart,
 } from "react-icons/fa";
+
+const EventMap = dynamic(() => import("@/components/EventMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[600px] w-full bg-brand-grey-dark/20 animate-pulse rounded-xl flex items-center justify-center text-brand-grey">
+      {/* Translate this via context or prop if needed */}
+      Carregando mapa...
+    </div>
+  ),
+});
 
 interface Props {
   events: Event[];
   locale?: "pt" | "en";
+  initialQuery?: string;
 }
 
 const isFree = (price?: string) => {
@@ -42,8 +59,6 @@ const getCategoryForEvent = (
     text.includes("dance") ||
     text.includes("cabaret") ||
     text.includes("burlesque") ||
-    text.includes("stand-up") ||
-    text.includes("comedy") ||
     text.includes("vida nocturna") ||
     text.includes("noite louca") ||
     (text.includes("barcos") && text.includes("festa"))
@@ -55,7 +70,11 @@ const getCategoryForEvent = (
     text.includes("teatro") ||
     text.includes("peça") ||
     text.includes("espetáculo") ||
-    text.includes("dramático")
+    text.includes("dramático") ||
+    text.includes("stand-up") ||
+    text.includes("stand up") ||
+    text.includes("comedy") ||
+    text.includes("humor")
   )
     return "Teatro";
 
@@ -79,6 +98,18 @@ const getCategoryForEvent = (
     text.includes("fado") ||
     text.includes("rock") ||
     text.includes("jazz") ||
+    text.includes("techno") ||
+    text.includes("house") ||
+    text.includes("trance") ||
+    text.includes("rave") ||
+    text.includes("edm") ||
+    text.includes("electronic") ||
+    text.includes("eletrónica") ||
+    text.includes("dnb") ||
+    text.includes("drum & bass") ||
+    text.includes("dubstep") ||
+    text.includes("hardstyle") ||
+    text.includes("psytrance") ||
     text.includes("músicos") ||
     text.includes("músical")
   )
@@ -115,6 +146,30 @@ const getCategoryForEvent = (
     text.includes("entrevista")
   )
     return "Conferência";
+
+  // Workshop
+  if (
+    text.includes("workshop") ||
+    text.includes("masterclass") ||
+    text.includes("aula prática") ||
+    text.includes("hands-on")
+  )
+    return "Workshop";
+
+  // Gastronomia
+  if (
+    text.includes("gastronom") ||
+    text.includes("degusta") ||
+    text.includes("brunch") ||
+    text.includes("wine") ||
+    text.includes("vinho") ||
+    text.includes("cocktail") ||
+    text.includes("jantar") ||
+    text.includes("dinner") ||
+    text.includes("food") ||
+    text.includes("chef")
+  )
+    return "Gastronomia";
 
   // Mercado/Feira
   if (
@@ -155,21 +210,49 @@ const getMusicGenre = (
   description: string,
   category: string,
 ): MusicGenre | null => {
-  // Only detect for music category
-  if (!category.includes("Música")) return null;
+  // Detect for music and nightlife categories
+  const normalizedCategory = category || "";
+  if (
+    !normalizedCategory.includes("Música") &&
+    !normalizedCategory.includes("Discoteca/Nightlife")
+  )
+    return null;
 
   const text = `${title} ${description}`.toLowerCase();
 
+  if (/(drum\s*(?:and|&)\s*bass|\bdnb\b)/i.test(text)) return "Drum & Bass";
+  if (/(ukg|uk garage|garage)/i.test(text)) return "UK Garage";
+  if (/(hard\s*techno|hardtechno)/i.test(text)) return "Hard Techno";
+  if (/melodic\s+techno/i.test(text)) return "Melodic Techno";
+  if (/industrial\s+techno/i.test(text)) return "Industrial Techno";
+  if (/(minimal\s+techno|minimal)/i.test(text)) return "Minimal";
+  if (/(acid\s+techno|acid house|\bacid\b)/i.test(text)) return "Acid";
+  if (/techno/i.test(text)) return "Techno";
+  if (/deep\s+house/i.test(text)) return "Deep House";
+  if (/tech\s+house/i.test(text)) return "Tech House";
+  if (/progressive\s+house/i.test(text)) return "Progressive House";
+  if (/afro\s+house/i.test(text)) return "Afro House";
+  if (/melodic\s+house/i.test(text)) return "Melodic House";
+  if (/house/i.test(text)) return "House";
+  if (/(psy\s*trance|psytrance)/i.test(text)) return "Psytrance";
+  if (/(\bgoa\b|goa\s+trance)/i.test(text)) return "Goa";
   if (text.includes("fado")) return "Fado";
+  if (/(metal|heavy metal|thrash|death metal|black metal)/i.test(text))
+    return "Metal";
+  if (/punk/i.test(text)) return "Punk";
+  if (/(indie|alternative)/i.test(text)) return "Indie/Alternative";
   if (text.includes("rock")) return "Rock";
   if (text.includes("jazz")) return "Jazz";
   if (text.includes("pop")) return "Pop";
-  if (text.includes("hard techno") || text.includes("hardtechno"))
-    return "Hard Techno";
-  if (text.includes("techno")) return "Techno";
   if (text.includes("trance")) return "Trance";
-  if (text.includes("house")) return "House";
+  if (/(electro|electroclash|electronic)/i.test(text)) return "Electro";
+  if (/breakbeat/i.test(text)) return "Breakbeat";
+  if (/dubstep/i.test(text)) return "Dubstep";
+  if (/hardstyle/i.test(text)) return "Hardstyle";
+  if (/disco/i.test(text)) return "Disco";
+  if (/(downtempo|chillout|lofi|ambient)/i.test(text)) return "Downtempo/Chill";
   if (text.includes("funk")) return "Funk";
+  if (/(r&b|rnb|neo soul|\bsoul\b)/i.test(text)) return "R&B/Soul";
   if (
     text.includes("clássic") ||
     text.includes("orquest") ||
@@ -178,6 +261,9 @@ const getMusicGenre = (
   )
     return "Clássico";
   if (text.includes("reggae")) return "Reggae";
+  if (/(afrobeats|afrobeat)/i.test(text)) return "Afrobeats";
+  if (/(salsa|bachata|reggaeton|flamenco|latin|latino|cumbia)/i.test(text))
+    return "World/Latin";
   if (
     text.includes("hip-hop") ||
     text.includes("hiphop") ||
@@ -200,41 +286,60 @@ const getMusicGenre = (
   if (text.includes("experimental") || text.includes("avant-garde"))
     return "Experimental";
 
-  return null;
+  return "Outro";
 };
 
-export default function EventsClient({ events, locale = "pt" }: Props) {
+export default function EventsClient({
+  events,
+  locale = "pt",
+  initialQuery = "",
+}: Props) {
+  const t = useTranslations(locale);
   const labels = {
-    musicGenre: locale === "pt" ? "Género de Música" : "Music Genre",
-    upcoming: locale === "pt" ? "Próximos Eventos" : "Upcoming Events",
-    filters: locale === "pt" ? "Filtros" : "Filters",
-    clearAll: locale === "pt" ? "Limpar tudo" : "Clear all",
-    searchPlaceholder: locale === "pt" ? "Pesquisar..." : "Search...",
-    clearSearch: locale === "pt" ? "Limpar pesquisa" : "Clear search",
-    minDate: locale === "pt" ? "Data mínima" : "Minimum date",
-    freeOnly: locale === "pt" ? "Só gratuitos" : "Free only",
-    sortLabel: locale === "pt" ? "Ordenar" : "Sort",
-    sortAsc: locale === "pt" ? "Mais próximos" : "Soonest",
-    sortDesc: locale === "pt" ? "Mais distantes" : "Latest",
-    eventType: locale === "pt" ? "Tipo de Evento" : "Event Type",
-    noResults:
-      locale === "pt"
-        ? "Nenhum evento encontrado com os filtros atuais."
-        : "No events found for the selected filters.",
-    clearFilters:
-      locale === "pt" ? "Tentar remover filtros" : "Try clearing filters",
+    musicGenre: t("events.music_genre", "Género de Música"),
+    source: t("events.source", "Fonte"),
+    upcoming: t("events.upcoming_events", "Próximos Eventos"),
+    filters: t("events.filters", "Filtros"),
+    clearAll: t("events.clear_all", "Limpar tudo"),
+    searchPlaceholder: t("events.search", "Pesquisar..."),
+    clearSearch: t("events.clear_search", "Limpar pesquisa"),
+    minDate: t("events.minimum_date", "Data mínima"),
+    freeOnly: t("events.free_only", "Só gratuitos"),
+    sortLabel: t("events.sort_label", "Ordenar"),
+    sortAsc: t("events.sort_soonest", "Mais próximos"),
+    sortDesc: t("events.sort_latest", "Mais distantes"),
+    eventType: t("events.event_type", "Tipo de Evento"),
+    noResults: t(
+      "events.no_results",
+      "Nenhum evento encontrado com os filtros atuais.",
+    ),
+    clearFilters: t("events.clear_filters", "Tentar remover filtros"),
+    favoritesOnly: t("events.favorites_only", "Só favoritos"),
+    loadingMap: t("events.loading_map", "Carregando mapa..."),
   };
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [startDate, setStartDate] = useState("");
   const [onlyFree, setOnlyFree] = useState(false);
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [sort, setSort] = useState<"asc" | "desc">("asc");
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const { favoriteIds, favoriteCount } = useFavorites();
   const [selectedCategories, setSelectedCategories] = useState<
     Set<EventCategory>
   >(new Set());
+  const [selectedSources, setSelectedSources] = useState<Set<EventSource>>(
+    new Set(),
+  );
   const [selectedGenres, setSelectedGenres] = useState<Set<MusicGenre>>(
     new Set(),
   );
+
+  const uniqueSources = useMemo(() => {
+    const src = new Set<EventSource>();
+    events.forEach((e) => src.add(e.source));
+    return Array.from(src).sort();
+  }, [events]);
 
   // Get unique categories
   const uniqueCategories = useMemo(() => {
@@ -253,7 +358,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     events.forEach((e) => {
       const cat =
         e.category || getCategoryForEvent(e.title, e.description, e.location);
-      if (cat === "Música") {
+      if (cat === "Música" || cat === "Discoteca/Nightlife") {
         const genre =
           e.musicGenre || getMusicGenre(e.title, e.description, cat);
         if (genre) genres.add(genre);
@@ -272,6 +377,16 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     setSelectedCategories(newCategories);
   };
 
+  const toggleSource = (source: EventSource) => {
+    const newSources = new Set(selectedSources);
+    if (newSources.has(source)) {
+      newSources.delete(source);
+    } else {
+      newSources.add(source);
+    }
+    setSelectedSources(newSources);
+  };
+
   const toggleGenre = (genre: MusicGenre) => {
     const newGenres = new Set(selectedGenres);
     if (newGenres.has(genre)) {
@@ -286,6 +401,8 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     query ||
     startDate ||
     onlyFree ||
+    onlyFavorites ||
+    selectedSources.size > 0 ||
     selectedCategories.size > 0 ||
     selectedGenres.size > 0;
 
@@ -293,6 +410,8 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     setQuery("");
     setStartDate("");
     setOnlyFree(false);
+    setOnlyFavorites(false);
+    setSelectedSources(new Set());
     setSelectedCategories(new Set());
     setSelectedGenres(new Set());
   };
@@ -302,6 +421,7 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     return events
       .filter((e) => {
         if (onlyFree && !isFree(e.price)) return false;
+        if (onlyFavorites && !favoriteIds.includes(e.id)) return false;
         if (startDate) {
           const evEndOrStart = e.endDate
             ? new Date(e.endDate)
@@ -313,6 +433,9 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
             e.category ||
             getCategoryForEvent(e.title, e.description, e.location);
           if (!selectedCategories.has(eventCat)) return false;
+        }
+        if (selectedSources.size > 0) {
+          if (!selectedSources.has(e.source)) return false;
         }
         if (selectedGenres.size > 0) {
           const eventCat =
@@ -338,8 +461,11 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
     events,
     query,
     onlyFree,
+    onlyFavorites,
+    favoriteIds,
     startDate,
     sort,
+    selectedSources,
     selectedCategories,
     selectedGenres,
   ]);
@@ -354,10 +480,12 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
             {hasActiveFilters && (
               <span className="bg-brand-red text-white px-2 py-1 rounded text-xs font-bold">
                 {selectedCategories.size +
+                  selectedSources.size +
                   selectedGenres.size +
                   (query ? 1 : 0) +
                   (startDate ? 1 : 0) +
-                  (onlyFree ? 1 : 0)}
+                  (onlyFree ? 1 : 0) +
+                  (onlyFavorites ? 1 : 0)}
               </span>
             )}
           </div>
@@ -416,6 +544,19 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
             <span className="text-sm">{labels.freeOnly}</span>
           </label>
 
+          <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 text-sm text-white lg:col-span-1 cursor-pointer hover:border-brand-red transition-colors">
+            <input
+              type="checkbox"
+              checked={onlyFavorites}
+              onChange={(e) => setOnlyFavorites(e.target.checked)}
+              className="accent-brand-red w-4 h-4 cursor-pointer"
+            />
+            <span className="text-sm flex items-center gap-1.5">
+              <FaHeart className="text-brand-red" size={12} />
+              {labels.favoritesOnly}
+            </span>
+          </label>
+
           {/* Sort Filter */}
           <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
             <span className="text-xs font-bold">{labels.sortLabel}</span>
@@ -429,6 +570,43 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
             </select>
           </label>
         </div>
+
+        {/* Source Filter - Multi-select */}
+        {uniqueSources.length > 1 && (
+          <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up">
+            <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+              <FaTag size={12} className="text-brand-red" />
+              <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
+                {labels.source}
+              </span>
+              <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
+                {selectedSources.size}
+              </span>
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              {uniqueSources.map((source) => (
+                <button
+                  key={source}
+                  onClick={() => toggleSource(source)}
+                  aria-pressed={selectedSources.has(source)}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
+                    selectedSources.has(source)
+                      ? "bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white border border-cyan-500/50 shadow-[0_0_15px_-3px_rgba(20,184,166,0.5)] transform scale-105"
+                      : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-emerald-500/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(16,185,129,0.3)] hover:-translate-y-0.5"
+                  }`}
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-1.5">
+                    {selectedSources.has(source) && (
+                      <FaCheck size={10} className="animate-scale-in" />
+                    )}
+                    {source}
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Category Filter - Multi-select */}
         {uniqueCategories.length > 1 && (
@@ -515,21 +693,57 @@ export default function EventsClient({ events, locale = "pt" }: Props) {
           <span className="text-white text-base">
             {filtered.length} / {events.length}
           </span>
+          <span className="ml-2 text-xs text-brand-grey flex items-center gap-1 normal-case tracking-normal font-semibold">
+            <FaHeart className="text-brand-red" size={11} />
+            {favoriteCount}
+          </span>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex bg-brand-black-light p-1 rounded-lg border border-brand-grey-dark/50">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === "grid"
+                ? "bg-brand-red text-white shadow-md scale-105"
+                : "text-brand-grey hover:text-white"
+            }`}
+            aria-label="Grid View"
+          >
+            <FaList size={14} />
+          </button>
+          <button
+            onClick={() => setViewMode("map")}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === "map"
+                ? "bg-brand-red text-white shadow-md scale-105"
+                : "text-brand-grey hover:text-white"
+            }`}
+            aria-label="Map View"
+          >
+            <FaMapMarkedAlt size={14} />
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {filtered.map((event) => (
-          <div key={event.id} className="h-full">
-            <Link
-              href={`/${locale}/events/${event.id}`}
-              className="block h-full hover:scale-[1.02] transition-transform"
-            >
-              <EventCard event={event} locale={locale} />
-            </Link>
-          </div>
-        ))}
-      </div>
+      {viewMode === "map" ? (
+        <div className="h-[600px] w-full bg-brand-black-light rounded-2xl overflow-hidden shadow-lg border border-brand-grey-dark/50 mb-8">
+          <EventMap events={filtered} locale={locale} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filtered.map((event) => (
+            <div key={event.id} className="h-full">
+              <Link
+                href={`/${locale}/events/${event.id}`}
+                className="block h-full hover:scale-[1.02] transition-transform"
+              >
+                <EventCard event={event} locale={locale} />
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <div className="text-center py-16">

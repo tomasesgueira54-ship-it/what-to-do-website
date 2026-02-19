@@ -1,6 +1,18 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Event } from "@/data/types";
-import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaTicketAlt,
+  FaHeart,
+} from "react-icons/fa";
+import { useFavorites } from "@/lib/use-favorites";
+import { useTranslations } from "@/lib/use-translations";
+import FloatingToast from "@/components/FloatingToast";
+import { getDisplayLocation, getDisplayPrice } from "@/lib/event-display";
 
 interface EventCardProps {
   event: Event;
@@ -8,6 +20,9 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, locale = "pt" }: EventCardProps) {
+  const { isHydrated, isFavorite, toggleFavorite } = useFavorites();
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const t = useTranslations(locale);
   const dateLocale = locale === "pt" ? "pt-PT" : "en-US";
   const eventDate = new Date(event.date);
   const today = new Date();
@@ -27,16 +42,52 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
   });
 
   const endDate = event.endDate ? new Date(event.endDate) : null;
-  const formattedTimeEnd = endDate
-    ? endDate.toLocaleTimeString(dateLocale, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
 
-  const normalizedPrice =
-    event.price ||
-    (locale === "pt" ? "Preço indisponível" : "Price unavailable");
+  // Detect placeholder times (T12:00:00.000Z = noon UTC = date-only, no real time)
+  const isPlaceholderTime =
+    eventDate.getUTCHours() === 12 &&
+    eventDate.getUTCMinutes() === 0 &&
+    eventDate.getUTCSeconds() === 0;
+
+  // Only show end time if: same calendar day AND different actual time
+  const isSameDay = endDate
+    ? endDate.toDateString() === eventDate.toDateString()
+    : false;
+  const hasDifferentTime = endDate
+    ? endDate.getTime() !== eventDate.getTime()
+    : false;
+  const showTimeRange = isSameDay && hasDifferentTime && !isPlaceholderTime;
+
+  const formattedTimeEnd =
+    showTimeRange && endDate
+      ? endDate.toLocaleTimeString(dateLocale, {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : null;
+
+  const rawPrice = getDisplayPrice(
+    event.price,
+    event.description,
+    locale === "pt",
+  );
+  // Normalize free-admission labels across locales
+  // "free" / "Free" / "Grátis" / "grátis" → locale-correct label
+  const rawPriceLower = rawPrice.toLowerCase();
+  const isFreeLabel =
+    rawPriceLower === "free" ||
+    rawPriceLower === "grátis" ||
+    rawPriceLower === "gratis";
+  const normalizedPrice = isFreeLabel
+    ? locale === "pt"
+      ? "Grátis"
+      : "Free"
+    : rawPrice;
+  const normalizedLocation = getDisplayLocation(
+    event.location,
+    event.description,
+    locale === "pt",
+  );
   const isPriceFree =
     normalizedPrice.toLowerCase().includes("grátis") ||
     normalizedPrice.toLowerCase() === "free";
@@ -44,18 +95,22 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
     ? "bg-green-500/15 border-green-500/40 text-green-300 shadow-[0_0_12px_rgba(74,222,128,0.15)]"
     : "bg-brand-red/15 border-brand-red/40 text-brand-red-light shadow-[0_0_12px_rgba(142,13,60,0.15)]";
 
+  const favorite = isHydrated ? isFavorite(event.id) : false;
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = window.setTimeout(() => setToastMessage(null), 2200);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
+
   const timeLabel = isToday
-    ? locale === "pt"
-      ? "Hoje"
-      : "Today"
+    ? t("events.today", "Today")
     : isTomorrow
-      ? locale === "pt"
-        ? "Amanhã"
-        : "Tomorrow"
+      ? t("events.tomorrow", "Tomorrow")
       : formattedDate;
 
   return (
-    <div className="bg-brand-black-light rounded-xl overflow-hidden shadow-lg hover:shadow-[0_0_30px_-5px_rgba(142,13,60,0.4)] hover:-translate-y-1 transition-all duration-300 border border-white/5 ring-1 ring-white/5 hover:border-brand-red/50 hover:ring-brand-red/50 group h-full flex flex-col relative z-0">
+    <div className="bg-brand-black-light rounded-xl overflow-hidden shadow-lg hover:shadow-[0_0_30px_-5px_rgba(142,13,60,0.4)] hover:-translate-y-1 transition-all duration-300 border border-white/5 ring-1 ring-white/5 hover:border-brand-red/50 hover:ring-brand-red/50 group h-full flex flex-col relative z-0 cursor-pointer">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-brand-red/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
 
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-brand-grey-dark z-10">
@@ -98,6 +153,33 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
             </span>
           )}
         </div>
+
+        <button
+          type="button"
+          aria-label={
+            favorite
+              ? t("favorites.remove", "Remove from favorites")
+              : t("favorites.add", "Add to favorites")
+          }
+          aria-pressed={favorite}
+          onClick={(eventClick) => {
+            eventClick.preventDefault();
+            eventClick.stopPropagation();
+            setToastMessage(
+              favorite
+                ? t("favorites.removed", "Removed from favorites")
+                : t("favorites.added", "Added to favorites"),
+            );
+            toggleFavorite(event.id);
+          }}
+          className={`absolute top-3 right-20 z-20 p-2.5 rounded-full border backdrop-blur-md transition-all duration-200 ${
+            favorite
+              ? "bg-brand-red text-white border-brand-red shadow-[0_0_12px_rgba(142,13,60,0.45)]"
+              : "bg-black/55 text-white border-white/20 hover:border-brand-red hover:text-brand-red"
+          }`}
+        >
+          <FaHeart size={14} />
+        </button>
       </div>
 
       <div className="p-5 flex-1 flex flex-col gap-3 relative z-10 bg-brand-black-light/95 backdrop-blur-sm">
@@ -111,13 +193,23 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
                 {timeLabel}
               </span>
               <span className="text-sm font-bold text-white tracking-wide">
-                {formattedTimeStart}
-                {formattedTimeEnd ? ` — ${formattedTimeEnd}` : ""}
+                {isPlaceholderTime ? (
+                  locale === "pt" ? (
+                    "Hora a confirmar"
+                  ) : (
+                    "Time TBC"
+                  )
+                ) : (
+                  <>
+                    {formattedTimeStart}
+                    {formattedTimeEnd ? ` — ${formattedTimeEnd}` : ""}
+                  </>
+                )}
               </span>
               {endDate &&
                 endDate.toDateString() !== eventDate.toDateString() && (
                   <span className="text-[10px] text-brand-grey mt-0.5">
-                    até{" "}
+                    {t("events.until", "until")}{" "}
                     {endDate.toLocaleDateString(dateLocale, {
                       day: "numeric",
                       month: "short",
@@ -140,24 +232,27 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
           {event.title}
         </h3>
 
-        {/* Hide long descriptions in cards; only show inside event page */}
-        <p className="text-brand-grey text-xs italic flex-1 hidden sm:block">
-          {locale === "pt"
-            ? "Descrição disponível na página do evento."
-            : "Description available on the event page."}
-        </p>
+        {/* Description snippet */}
+        {event.description && event.description.length > 5 && (
+          <p className="text-brand-grey text-xs leading-relaxed flex-1 line-clamp-3">
+            {event.description.length > 130
+              ? event.description.slice(0, 130).trimEnd() + "…"
+              : event.description}
+          </p>
+        )}
 
         <div className="mt-auto flex items-center justify-between text-brand-grey-light text-xs pt-4 border-t border-dashed border-white/10">
           <span className="flex items-center gap-1.5 truncate max-w-[70%] group-hover:text-white transition-colors duration-300">
             <FaMapMarkerAlt className="text-brand-red flex-shrink-0" />{" "}
-            {event.location}
+            {normalizedLocation}
           </span>
           <span className="flex items-center gap-1.5 text-brand-red text-[10px] font-bold uppercase tracking-wider bg-brand-red/10 px-2 py-1 rounded-full group-hover:bg-brand-red group-hover:text-white transition-all duration-300">
-            {locale === "pt" ? "Ver Mais" : "View More"}{" "}
-            <FaTicketAlt size={10} />
+            {t("events.view_more", "View More")} <FaTicketAlt size={10} />
           </span>
         </div>
       </div>
+
+      <FloatingToast message={toastMessage} />
     </div>
   );
 }

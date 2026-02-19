@@ -32,16 +32,20 @@ async function hydrateEventbriteDetails(events: Event[]): Promise<void> {
                 });
                 const $ = cheerio.load(data);
 
-                if (!ev.date) {
+                if (!ev.date || !ev.endDate) {
                     const ld = $('script[type="application/ld+json"]').first().html();
                     if (ld) {
                         try {
                             const json = JSON.parse(ld);
                             const arr = Array.isArray(json) ? json : [json];
                             const found = arr.find((j: any) => j.startDate) as any;
-                            if (found?.startDate) {
+                            if (found?.startDate && !ev.date) {
                                 const normalized = safeDate(found.startDate);
                                 if (normalized) ev.date = normalized;
+                            }
+                            if (found?.endDate && !ev.endDate) {
+                                const normalizedEnd = safeDate(found.endDate);
+                                if (normalizedEnd) ev.endDate = normalizedEnd;
                             }
                         } catch {
                             /* ignore */
@@ -52,6 +56,12 @@ async function hydrateEventbriteDetails(events: Event[]): Promise<void> {
                             $('meta[itemprop="startDate"], meta[property="event:start_time"], meta[name="startDate"]').attr('content') || '';
                         const normalized = safeDate(meta || undefined);
                         if (normalized) ev.date = normalized;
+                    }
+                    if (!ev.endDate) {
+                        const metaEnd =
+                            $('meta[itemprop="endDate"], meta[property="event:end_time"], meta[name="endDate"]').attr('content') || '';
+                        const normalizedEnd = safeDate(metaEnd || undefined);
+                        if (normalizedEnd) ev.endDate = normalizedEnd;
                     }
                 }
 
@@ -129,6 +139,7 @@ export async function scrapeEventbrite(): Promise<Event[]> {
                                 title: ev.name,
                                 description: ev.description,
                                 date: ev.startDate,
+                                endDate: ev.endDate,
                                 location: (ev.location && ev.location.name) || '',
                                 image: ev.image,
                                 source: 'Eventbrite',

@@ -2,6 +2,7 @@ export type EventSource =
     | 'Agenda LX'
     | 'Fever'
     | 'Shotgun'
+    | 'Xceed'
     | 'Ticketline'
     | 'Eventbrite'
     | 'Meetup'
@@ -16,6 +17,7 @@ export type EventCategory =
     | 'Exposição'
     | 'Conferência'
     | 'Mercado/Feira'
+    | 'Gastronomia'
     | 'Discoteca/Nightlife'
     | 'Festa'
     | 'Workshop'
@@ -25,15 +27,40 @@ export type EventCategory =
 export type MusicGenre =
     | 'Fado'
     | 'Rock'
+    | 'Metal'
+    | 'Punk'
+    | 'Indie/Alternative'
     | 'Jazz'
     | 'Pop'
     | 'Techno'
+    | 'Melodic Techno'
+    | 'Industrial Techno'
+    | 'Minimal'
+    | 'Acid'
     | 'Hard Techno'
     | 'Trance'
+    | 'Psytrance'
+    | 'Goa'
     | 'House'
+    | 'Deep House'
+    | 'Tech House'
+    | 'Progressive House'
+    | 'Afro House'
+    | 'Melodic House'
+    | 'Electro'
+    | 'Breakbeat'
+    | 'Drum & Bass'
+    | 'Dubstep'
+    | 'UK Garage'
+    | 'Hardstyle'
+    | 'Disco'
+    | 'Downtempo/Chill'
     | 'Funk'
+    | 'R&B/Soul'
     | 'Clássico'
     | 'Reggae'
+    | 'Afrobeats'
+    | 'World/Latin'
     | 'Hip-Hop'
     | 'Folk/Tradicional'
     | 'Samba/Carnaval'
@@ -50,6 +77,8 @@ export interface Event {
     endDate?: string; // optional ISO end date/time
     location: string;
     address?: string;
+    lat?: number;
+    lng?: number;
     image: string;
     source: EventSource;
     url: string; // External Application URL

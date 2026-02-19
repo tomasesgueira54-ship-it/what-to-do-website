@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubscribeSchema, type SubscribeInput } from "@/lib/schemas/subscribe";
+import { useTranslations } from "@/lib/use-translations";
 import { FaEnvelope, FaCheck, FaTimes } from "react-icons/fa";
 
 interface SubscribeFormProps {
@@ -12,32 +13,12 @@ interface SubscribeFormProps {
   onSuccess?: () => void;
 }
 
-const translations = {
-  pt: {
-    namePlaceholder: "Seu nome...",
-    placeholder: "Seu email...",
-    consentLabel: "Concordo em receber comunicações por email.",
-    button: "Subscrever",
-    success: "Obrigado! Verifica o teu email.",
-    error: "Erro ao subscrever. Tenta novamente.",
-    already: "Este email já está subscrito.",
-  },
-  en: {
-    namePlaceholder: "Your name...",
-    placeholder: "Your email...",
-    consentLabel: "I agree to receive communications by email.",
-    button: "Subscribe",
-    success: "Thank you! Check your email.",
-    error: "Error subscribing. Try again.",
-    already: "This email is already subscribed.",
-  },
-};
-
 export default function SubscribeForm({
   locale = "pt",
   variant = "default",
   onSuccess,
 }: SubscribeFormProps) {
+  const t = useTranslations(locale);
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -80,14 +61,17 @@ export default function SubscribeForm({
       } else {
         setStatus("error");
         if (result.error === "ALREADY_SUBSCRIBED") {
-          setErrorMsg(translations[locale].already);
+          setErrorMsg(t("subscribe.already", "Este email já está subscrito."));
         } else {
-          setErrorMsg(result.message || translations[locale].error);
+          setErrorMsg(
+            result.message ||
+              t("subscribe.error", "Erro ao subscrever. Tenta novamente."),
+          );
         }
       }
     } catch (err) {
       setStatus("error");
-      setErrorMsg(translations[locale].error);
+      setErrorMsg(t("subscribe.error", "Erro ao subscrever. Tenta novamente."));
       console.error("Subscribe error:", err);
     }
   };
@@ -103,7 +87,7 @@ export default function SubscribeForm({
       >
         <input
           type="text"
-          placeholder={translations[locale].namePlaceholder}
+          placeholder={t("subscribe.name_placeholder", "Seu nome...")}
           disabled={status === "loading" || status === "success"}
           {...register("name")}
           aria-invalid={!!errors.name}
@@ -111,12 +95,14 @@ export default function SubscribeForm({
           className="px-4 py-2 rounded bg-brand-black text-white border border-brand-grey focus:border-brand-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {errors.name && (
-          <p id="subscribe-name-error" className="text-red-500 text-xs">{errors.name.message}</p>
+          <p id="subscribe-name-error" className="text-red-500 text-xs">
+            {errors.name.message}
+          </p>
         )}
 
         <input
           type="email"
-          placeholder={translations[locale].placeholder}
+          placeholder={t("subscribe.placeholder", "Seu email...")}
           disabled={status === "loading" || status === "success"}
           {...register("email")}
           aria-invalid={!!errors.email}
@@ -124,7 +110,9 @@ export default function SubscribeForm({
           className="px-4 py-2 rounded bg-brand-black text-white border border-brand-grey focus:border-brand-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {errors.email && (
-          <p id="subscribe-email-error" className="text-red-500 text-xs">{errors.email.message}</p>
+          <p id="subscribe-email-error" className="text-red-500 text-xs">
+            {errors.email.message}
+          </p>
         )}
 
         <label className="text-xs text-brand-grey flex items-start gap-2">
@@ -133,13 +121,22 @@ export default function SubscribeForm({
             disabled={status === "loading" || status === "success"}
             {...register("gdprConsent")}
             aria-invalid={!!errors.gdprConsent}
-            aria-describedby={errors.gdprConsent ? "subscribe-consent-error" : undefined}
+            aria-describedby={
+              errors.gdprConsent ? "subscribe-consent-error" : undefined
+            }
             className="mt-0.5"
           />
-          <span>{translations[locale].consentLabel}</span>
+          <span>
+            {t(
+              "subscribe.consent_label",
+              "Concordo em receber comunicações por email.",
+            )}
+          </span>
         </label>
         {errors.gdprConsent && (
-          <p id="subscribe-consent-error" className="text-red-500 text-xs">{errors.gdprConsent.message}</p>
+          <p id="subscribe-consent-error" className="text-red-500 text-xs">
+            {errors.gdprConsent.message}
+          </p>
         )}
 
         <button
@@ -151,16 +148,24 @@ export default function SubscribeForm({
           {status === "success" && <FaCheck />}
           {status === "error" && <FaTimes />}
           {status !== "success"
-            ? translations[locale].button
-            : "✓ " + translations[locale].success}
+            ? t("subscribe.button", "Subscrever")
+            : "✓ " + t("subscribe.success", "Obrigado! Verifica o teu email.")}
         </button>
 
         {status === "error" && (
-          <p role="alert" aria-live="assertive" className="text-red-500 text-xs">{errorMsg}</p>
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="text-red-500 text-xs"
+          >
+            {errorMsg}
+          </p>
         )}
 
         <div className="sr-only" aria-live="polite">
-          {status === "success" ? translations[locale].success : ""}
+          {status === "success"
+            ? t("subscribe.success", "Obrigado! Verifica o teu email.")
+            : ""}
         </div>
       </form>
     );
@@ -175,11 +180,13 @@ export default function SubscribeForm({
         <div className={isCompact ? "flex-1" : ""}>
           <input
             type="text"
-            placeholder={translations[locale].namePlaceholder}
+            placeholder={t("subscribe.name_placeholder", "Seu nome...")}
             disabled={status === "loading" || status === "success"}
             {...register("name")}
             aria-invalid={!!errors.name}
-            aria-describedby={errors.name ? "subscribe-name-error-main" : undefined}
+            aria-describedby={
+              errors.name ? "subscribe-name-error-main" : undefined
+            }
             className={`
               w-full px-4 py-3 rounded-lg bg-brand-black text-white 
               border border-brand-grey focus:border-brand-red focus:outline-none 
@@ -188,18 +195,23 @@ export default function SubscribeForm({
             `}
           />
           {errors.name && (
-            <p id="subscribe-name-error-main" className="text-red-500 text-sm mt-1 mb-2">
+            <p
+              id="subscribe-name-error-main"
+              className="text-red-500 text-sm mt-1 mb-2"
+            >
               {errors.name.message}
             </p>
           )}
 
           <input
             type="email"
-            placeholder={translations[locale].placeholder}
+            placeholder={t("subscribe.placeholder", "Seu email...")}
             disabled={status === "loading" || status === "success"}
             {...register("email")}
             aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "subscribe-email-error-main" : undefined}
+            aria-describedby={
+              errors.email ? "subscribe-email-error-main" : undefined
+            }
             className={`
               w-full px-4 py-3 rounded-lg bg-brand-black text-white 
               border border-brand-grey focus:border-brand-red focus:outline-none 
@@ -208,7 +220,12 @@ export default function SubscribeForm({
             `}
           />
           {errors.email && (
-            <p id="subscribe-email-error-main" className="text-red-500 text-sm mt-2">{errors.email.message}</p>
+            <p
+              id="subscribe-email-error-main"
+              className="text-red-500 text-sm mt-2"
+            >
+              {errors.email.message}
+            </p>
           )}
 
           <label className="text-sm text-brand-grey flex items-start gap-2 mt-3">
@@ -217,13 +234,23 @@ export default function SubscribeForm({
               disabled={status === "loading" || status === "success"}
               {...register("gdprConsent")}
               aria-invalid={!!errors.gdprConsent}
-              aria-describedby={errors.gdprConsent ? "subscribe-consent-error-main" : undefined}
+              aria-describedby={
+                errors.gdprConsent ? "subscribe-consent-error-main" : undefined
+              }
               className="mt-1"
             />
-            <span>{translations[locale].consentLabel}</span>
+            <span>
+              {t(
+                "subscribe.consent_label",
+                "Concordo em receber comunicações por email.",
+              )}
+            </span>
           </label>
           {errors.gdprConsent && (
-            <p id="subscribe-consent-error-main" className="text-red-500 text-sm mt-2">
+            <p
+              id="subscribe-consent-error-main"
+              className="text-red-500 text-sm mt-2"
+            >
               {errors.gdprConsent.message}
             </p>
           )}
@@ -241,18 +268,26 @@ export default function SubscribeForm({
           {status === "loading" && <span className="animate-spin">⏳</span>}
           {status === "success" && <FaCheck />}
           {status === "error" && <FaTimes />}
-          {status === "success" ? "✓" : translations[locale].button}
+          {status === "success" ? "✓" : t("subscribe.button", "Subscrever")}
         </button>
       </div>
 
       {status === "success" && (
-        <div role="status" aria-live="polite" className="p-3 bg-green-900/20 border border-green-600 rounded text-green-300 text-sm">
-          ✓ {translations[locale].success}
+        <div
+          role="status"
+          aria-live="polite"
+          className="p-3 bg-green-900/20 border border-green-600 rounded text-green-300 text-sm"
+        >
+          ✓ {t("subscribe.success", "Obrigado! Verifica o teu email.")}
         </div>
       )}
 
       {status === "error" && (
-        <div role="alert" aria-live="assertive" className="p-3 bg-red-900/20 border border-red-600 rounded text-red-300 text-sm">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-3 bg-red-900/20 border border-red-600 rounded text-red-300 text-sm"
+        >
           ✗ {errorMsg}
         </div>
       )}

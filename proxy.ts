@@ -1,41 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { locales, defaultLocale } from './i18n.config';
+import { NextRequest, NextResponse } from "next/server";
+
+const SUPPORTED_LOCALES = ["pt", "en"] as const;
+const DEFAULT_LOCALE = "pt";
+
+function getPreferredLocale(request: NextRequest): string {
+    const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+    if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale as (typeof SUPPORTED_LOCALES)[number])) {
+        return cookieLocale;
+    }
+
+    const acceptLanguage = request.headers.get("accept-language") || "";
+    const preferred = acceptLanguage
+        .split(",")
+        .map((lang) => lang.split(";")[0].trim().toLowerCase().slice(0, 2))
+        .find((lang) => SUPPORTED_LOCALES.includes(lang as (typeof SUPPORTED_LOCALES)[number]));
+
+    return preferred || DEFAULT_LOCALE;
+}
 
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Log incoming requests for debugging intermittent 500s
-    try {
-        console.log(`[proxy] ${new Date().toISOString()} ${request.method} ${pathname}`);
-    } catch (e) {
-        /* ignore logging errors */
+    if (
+        pathname.startsWith("/_next") ||
+        pathname.startsWith("/api") ||
+        pathname.startsWith("/images") ||
+        pathname.startsWith("/audio") ||
+        pathname.startsWith("/video") ||
+        pathname.includes(".")
+    ) {
+        return NextResponse.next();
     }
 
-    const pathnameHasLocale = locales.some(
-        (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    const hasLocale = SUPPORTED_LOCALES.some(
+        (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
     );
-
-    if (pathnameHasLocale) return;
-
-    const acceptLanguage = request.headers.get('accept-language');
-    let locale: 'pt' | 'en' = defaultLocale as 'pt' | 'en';
-
-    if (acceptLanguage) {
-        const preferredLocale = acceptLanguage
-            .split(',')[0]
-            .split('-')[0]
-            .toLowerCase();
-
-        if (locales.includes(preferredLocale as any)) {
-            locale = preferredLocale as 'pt' | 'en';
-        }
+    if (hasLocale) {
+        return NextResponse.next();
     }
 
+    const locale = getPreferredLocale(request);
     return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
 }
 
 export const config = {
-    matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)',
-    ],
+    matcher: ["/((?!_next|api|images|audio|video|favicon.ico).*)"],
 };

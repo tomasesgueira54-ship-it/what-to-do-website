@@ -33,7 +33,8 @@ export async function generateMetadata({
     ? (localeParam as Locale)
     : defaultLocale;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://whattodo.pt";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://what-to-do.vercel.app";
 
   return {
     metadataBase: new URL(siteUrl),

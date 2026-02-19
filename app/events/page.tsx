@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
 export default function EventsPage() {
-  redirect('/pt/events')
+  redirect("/pt/events");
 }

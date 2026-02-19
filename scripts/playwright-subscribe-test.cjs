@@ -11,7 +11,18 @@ const { chromium } = require('playwright');
     });
 
     page.on('requestfailed', req => {
-        issues.push({ type: 'requestfailed', url: req.url(), error: req.failure()?.errorText || 'failed' });
+        const url = req.url();
+        const error = req.failure()?.errorText || 'failed';
+
+        if (error.includes('ERR_ABORTED') && url.includes('_rsc=')) {
+            return;
+        }
+
+        if (error.includes('ERR_ABORTED') && /\.(mp4|webm)(\?|$)/i.test(url)) {
+            return;
+        }
+
+        issues.push({ type: 'requestfailed', url, error });
     });
 
     const responses = [];

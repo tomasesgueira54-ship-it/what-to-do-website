@@ -2,6 +2,7 @@ import {
     scrapeAgendaLX,
     scrapeFever,
     scrapeShotgun,
+    scrapeXceed,
     scrapeTicketline,
     scrapeEventbrite,
     scrapeMeetup,
@@ -482,7 +483,34 @@ export function extractEndDateFromHtml(html: string): string {
 function isMissingPrice(price?: string): boolean {
     if (!price) return true;
     const value = price.trim().toLowerCase();
-    return value === '' || value === 'check site' || value === 'n/a' || value === 'na' || value === 'price unavailable';
+    return value === ''
+        || value === 'check site'
+        || value === 'n/a'
+        || value === 'na'
+        || value === 'price unavailable'
+        || value === 'a confirmar'
+        || value === 'tbd'
+        || value.includes('confirmar');
+}
+
+function isMissingLocation(location?: string): boolean {
+    if (!location) return true;
+    const value = location.trim().toLowerCase();
+    return value === ''
+        || value === 'unknown'
+        || value === 'n/a'
+        || value === 'na'
+        || value === 'location unavailable'
+        || value === 'verificar descrição'
+        || value === 'see description'
+        || value.includes('verificar');
+}
+
+function getConfirmationFallback(type: 'price' | 'location'): string {
+    if (type === 'price') {
+        return 'A confirmar';
+    }
+    return 'Verificar descrição';
 }
 
 function normalizePriceLabel(raw?: string | number): string {
@@ -738,6 +766,9 @@ async function main() {
     const shotgunEvents = await scrapeShotgun();
     allEvents.push(...shotgunEvents);
 
+    const xceedEvents = await scrapeXceed();
+    allEvents.push(...xceedEvents);
+
     const ticketlineEvents = await scrapeTicketline();
     allEvents.push(...ticketlineEvents);
 
@@ -771,14 +802,14 @@ async function main() {
             return !isNaN(endOrStart) && endOrStart >= todayUtc;
         });
 
-    // Fallback: if an event has a valid start date but no end date,
-    // treat it as a single-day event.
-    validEvents.forEach((ev) => {
-        if (!ev.endDate && ev.date) ev.endDate = ev.date;
-    });
+    // Note: we no longer set endDate = date for single-day events.
+    // This prevents nonsensical time displays like "13:00 — 13:00" on cards.
+    // Events without a real endDate simply show the start time only.
 
     validEvents.forEach((ev) => {
-        if (isMissingPrice(ev.price)) ev.price = 'Check site';
+        if (isMissingPrice(ev.price)) {
+            ev.price = getConfirmationFallback('price');
+        }
         ev.title = sanitizeText(ev.title);
         if (ev.subtitle) ev.subtitle = sanitizeText(ev.subtitle);
         if (!ev.subtitle || isWeakSubtitle(ev.subtitle)) {
@@ -793,7 +824,10 @@ async function main() {
             if (firstSentence) ev.subtitle = firstSentence.substring(0, 180);
         }
         ev.description = sanitizeText(ev.description);
-        ev.location = normalizeLocation(ev.location || '') || 'Lisboa';
+        const normalizedLocation = normalizeLocation(ev.location || '');
+        ev.location = isMissingLocation(normalizedLocation)
+            ? getConfirmationFallback('location')
+            : normalizedLocation;
         if (ev.address) ev.address = sanitizeText(ev.address);
     });
 

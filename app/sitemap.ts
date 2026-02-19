@@ -9,7 +9,7 @@ type EventRow = {
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://whattodo.pt";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://what-to-do.vercel.app";
     const now = new Date();
 
     const staticRoutes = [
@@ -20,10 +20,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
         "/en/about",
         "/pt/events",
         "/en/events",
+        "/pt/my-agenda",
+        "/en/my-agenda",
         "/pt/episodes",
         "/en/episodes",
+        "/pt/podcast/cantinho-dos-segredos",
+        "/en/podcast/cantinho-dos-segredos",
         "/pt/blog",
         "/en/blog",
+        "/pt/partners",
+        "/en/partners",
         "/pt/privacy",
         "/en/privacy",
         "/pt/terms",
