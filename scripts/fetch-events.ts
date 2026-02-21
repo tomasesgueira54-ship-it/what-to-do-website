@@ -696,16 +696,72 @@ async function enrichMissing(events: Event[]): Promise<void> {
     );
     if (targets.length === 0) return;
 
-    const concurrency = 8;
+    const concurrency = 5;
     let index = 0;
     const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
+    const hostLastRequest = new Map<string, number>();
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const hostMinInterval = (url: string) => {
+        const host = (() => {
+            try {
+                return new URL(url).hostname.toLowerCase();
+            } catch {
+                return '';
+            }
+        })();
+
+        if (host.includes('shotgun.live')) return 2400;
+        if (host.includes('meetup.com')) return 1400;
+        if (host.includes('eventbrite.')) return 1200;
+        return 350;
+    };
+
+    const waitHostWindow = async (url: string) => {
+        let host = '';
+        try {
+            host = new URL(url).hostname.toLowerCase();
+        } catch {
+            return;
+        }
+
+        const minInterval = hostMinInterval(url);
+        const last = hostLastRequest.get(host) || 0;
+        const now = Date.now();
+        const wait = Math.max(0, minInterval - (now - last));
+        const jitter = Math.floor(Math.random() * 250);
+        if (wait > 0 || jitter > 0) {
+            await delay(wait + jitter);
+        }
+        hostLastRequest.set(host, Date.now());
+    };
+
+    const fetchWithRetry = async (url: string) => {
+        let lastError: any;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                await waitHostWindow(url);
+                return await axios.get(url, { headers: { 'User-Agent': ua }, timeout: 10000 });
+            } catch (err: any) {
+                lastError = err;
+                const status = err?.response?.status;
+                if (!(status === 429 || status === 403 || (status >= 500 && status <= 599))) {
+                    break;
+                }
+                const backoff = 900 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 300);
+                await delay(backoff);
+            }
+        }
+        throw lastError;
+    };
 
     const worker = async () => {
         while (true) {
             const current = index < targets.length ? targets[index++] : null;
             if (!current) break;
             try {
-                const resp = await axios.get(current.url, { headers: { 'User-Agent': ua }, timeout: 10000 });
+                const resp = await fetchWithRetry(current.url);
                 const $ = cheerio.load(resp.data);
                 const ogImg =
                     $('meta[property="og:image"], meta[name="og:image"]').attr('content') ||

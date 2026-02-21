@@ -1,0 +1,4 @@
+* text=auto
+
+# Keep dataset stable across Windows/Linux (avoid perpetual CRLF diffs)
+data/events.json text eol=lf

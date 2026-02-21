@@ -4,6 +4,9 @@ import * as cheerio from 'cheerio';
 import { Event } from '../types';
 import { DEFAULT_UA, makeEvent, dismissCookies, cleanText, toAbsolute, safeDate, inferEndDateFromText, applyDefaultDuration } from './utils';
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const randomBetween = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
 const SHOTGUN_MONTHS: Record<string, number> = {
     jan: 0,
     january: 0,
@@ -124,19 +127,40 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
             || !e.image
             || e.image.includes('placeholder')
             || !e.date
-            || !e.endDate
-            || !e.price,
+            || !e.endDate,
     );
     if (!targets.length) return;
 
-    const concurrency = 6;
+    const concurrency = 3;
     let idx = 0;
 
     const worker = async () => {
         while (idx < targets.length) {
             const ev = targets[idx++];
             try {
-                const { data } = await axios.get(ev.url, { headers: { 'User-Agent': DEFAULT_UA }, timeout: 12000 });
+                await delay(randomBetween(350, 900));
+
+                let data = '';
+                let lastErr: any;
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        const response = await axios.get(ev.url, { headers: { 'User-Agent': DEFAULT_UA }, timeout: 12000 });
+                        data = response.data;
+                        break;
+                    } catch (err: any) {
+                        lastErr = err;
+                        const status = err?.response?.status;
+                        if (!(status === 429 || status === 403 || (status >= 500 && status <= 599))) {
+                            break;
+                        }
+                        await delay(900 * Math.pow(2, attempt - 1) + randomBetween(120, 420));
+                    }
+                }
+
+                if (!data) {
+                    throw lastErr || new Error('shotgun detail fetch failed');
+                }
+
                 const $ = cheerio.load(data);
 
                 if (!ev.description || ev.description === 'Ver detalhes') {
@@ -232,7 +256,6 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
         (e) =>
             !e.description
             || e.description === 'Ver detalhes'
-            || !e.price
             || !e.image
             || e.image.includes('placeholder')
             || !e.date
@@ -347,6 +370,7 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
 
 export async function scrapeShotgun(): Promise<Event[]> {
     let browser;
+    const includeDeepPages = process.env.SHOTGUN_DEEP_PAGES === '1';
 
     // Only use shotgun.live (shotgun.pt is geoblocked)
     // Try Lisbon-specific searches first, then Portugal, then global
@@ -357,11 +381,15 @@ export async function scrapeShotgun(): Promise<Event[]> {
         'https://shotgun.live/en/events?search=portugal',
         'https://shotgun.live/en/events',
         'https://shotgun.live/events/-/2',
-        'https://shotgun.live/events/-/3',
-        'https://shotgun.live/events/-/4',
     ];
 
+    if (includeDeepPages) {
+        urls.push('https://shotgun.live/events/-/3', 'https://shotgun.live/events/-/4');
+    }
+
     const byUrl = new Map<string, Event>();
+    let cooldownMs = 0;
+    let blockedStreak = 0;
 
     try {
         browser = await chromium.launch({ headless: true });
@@ -373,10 +401,30 @@ export async function scrapeShotgun(): Promise<Event[]> {
                     page = await browser.newPage({ userAgent: DEFAULT_UA });
                 }
 
+                if (cooldownMs > 0) {
+                    await delay(cooldownMs + randomBetween(200, 600));
+                }
+
+                await delay(randomBetween(700, 1600));
+
                 console.log('[Shotgun] Trying ' + url + '...');
-                await page.goto(url, { waitUntil: 'networkidle', timeout: 25000 });
+                const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                const status = response?.status() || 0;
+                if (status === 429 || status === 403) {
+                    blockedStreak += 1;
+                    cooldownMs = Math.min(12000, Math.max(1500, cooldownMs * 2 || 2500));
+                    console.warn(`[Shotgun] blocked (${status}) on ${url}; cooldown ${cooldownMs}ms`);
+                    if (blockedStreak >= 3) {
+                        console.warn('[Shotgun] stopping early due to repeated blocking');
+                        break;
+                    }
+                    continue;
+                }
+
+                blockedStreak = 0;
+                cooldownMs = Math.max(0, Math.floor(cooldownMs * 0.6));
                 await dismissCookies(page);
-                await page.waitForTimeout(2000);
+                await page.waitForTimeout(randomBetween(1400, 2600));
 
                 let stableRounds = 0;
                 let lastCount = -1;
@@ -401,7 +449,7 @@ export async function scrapeShotgun(): Promise<Event[]> {
                     });
 
                     await page.evaluate(() => window.scrollBy(0, window.innerHeight * 1.4));
-                    await page.waitForTimeout(clicked ? 1200 : 800);
+                    await page.waitForTimeout(clicked ? randomBetween(1000, 1800) : randomBetween(700, 1200));
                 }
 
                 const cards = await page.evaluate(() => {
