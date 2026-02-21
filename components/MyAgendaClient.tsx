@@ -115,10 +115,7 @@ export default function MyAgendaClient({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-brand-black-light border border-brand-grey-dark/40 rounded-xl p-6 max-w-sm w-full space-y-4">
             <h3 className="text-lg font-bold text-white">
-              {t(
-                "my_agenda.confirm_clear_title",
-                "Remove all favorites?",
-              )}
+              {t("my_agenda.confirm_clear_title", "Remove all favorites?")}
             </h3>
             <p className="text-brand-grey text-sm">
               {t(
