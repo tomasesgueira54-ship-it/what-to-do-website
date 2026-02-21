@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { FaArrowRight, FaClock } from "react-icons/fa";
+import { FaArrowRight, FaClock, FaNewspaper } from "react-icons/fa";
+import { useState } from "react";
 
 interface BlogCardProps {
   locale?: "pt" | "en";
@@ -16,20 +19,33 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post, locale = "pt" }: BlogCardProps) {
+  const [imageLoadError, setImageLoadError] = useState(false);
   const readMore = locale === "pt" ? "Ler mais" : "Read more";
-  const imageSrc = post.imageUrl || "/images/placeholder-card.svg";
+  const hasImage = post.imageUrl && !imageLoadError;
+
+  const handleImageError = () => {
+    setImageLoadError(true);
+  };
 
   return (
     <article className="card group">
       <Link href={`/${locale}/blog/${post.id}`}>
-        <div className="relative h-56 overflow-hidden">
-          <Image
-            src={imageSrc}
-            alt={post.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+        <div className="relative h-56 overflow-hidden bg-gradient-to-br from-brand-red/30 to-brand-red/10">
+          {hasImage && (
+            <Image
+              src={post.imageUrl}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={handleImageError}
+            />
+          )}
+          {!hasImage && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-red/40 to-brand-red/20">
+              <FaNewspaper className="text-6xl text-white/40" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all" />
           <div className="gradient-overlay" />
           <div className="absolute top-4 left-4">

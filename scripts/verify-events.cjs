@@ -42,6 +42,43 @@ function normalizeIso(s) {
     }
 }
 
+const PT_MONTHS = {
+    janeiro: 0,
+    fevereiro: 1,
+    'março': 2,
+    marco: 2,
+    abril: 3,
+    maio: 4,
+    junho: 5,
+    julho: 6,
+    agosto: 7,
+    setembro: 8,
+    outubro: 9,
+    novembro: 10,
+    dezembro: 11,
+};
+
+function parsePtDateWithOptionalTime(value) {
+    const text = String(value || '').toLowerCase();
+    const dateMatch = text.match(/(\d{1,2})\s+(janeiro|fevereiro|mar[cç]o|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+(\d{4})/i);
+    if (!dateMatch) return null;
+
+    const day = Number(dateMatch[1]);
+    const month = PT_MONTHS[dateMatch[2]];
+    const year = Number(dateMatch[3]);
+
+    const windowText = text.slice(Math.max(0, dateMatch.index || 0), (dateMatch.index || 0) + 120);
+    const timeMatch = windowText.match(/(?:às|as)?\s*(\d{1,2})(?:[:h](\d{2}))?/i);
+    const hour = timeMatch ? Math.min(23, Math.max(0, Number(timeMatch[1]))) : 12;
+    const minute = timeMatch && timeMatch[2] ? Math.min(59, Math.max(0, Number(timeMatch[2]))) : 0;
+
+    return new Date(Date.UTC(year, month, day, hour, minute, 0)).toISOString();
+}
+
+function normalizeDateCandidate(value) {
+    return normalizeIso(value) || parsePtDateWithOptionalTime(value);
+}
+
 function normalizeSource(value) {
     return String(value || 'unknown').trim().toLowerCase();
 }
@@ -149,8 +186,8 @@ function sampleBySource(items, maxPerSource = 3, hardCap = 30) {
 }
 
 function compareDates(evDate, foundDate, source = 'unknown') {
-    const evDateNorm = normalizeIso(evDate);
-    const foundDateNorm = normalizeIso(foundDate);
+    const evDateNorm = normalizeDateCandidate(evDate);
+    const foundDateNorm = normalizeDateCandidate(foundDate);
 
     if (!foundDate) return 'not-found';
     if (!evDateNorm || !foundDateNorm) return 'unknown';

@@ -1,9 +1,20 @@
 {
-  "scripts": {
-    "fetch:events": "npx ts-node scripts/fetch-events.ts"
+  "_comment": "Event refresh pipeline. See .github/workflows/fetch-events.yml for the actual runner.",
+  "pipeline": {
+    "step1_trigger": "Vercel Cron fires daily at 06:30 UTC → POST /api/cron/refresh-events",
+    "step2_dispatch": "API route calls GitHub API to dispatch workflow fetch-events.yml",
+    "step3_scrape": "GitHub Actions runner installs Playwright, runs npm run fetch:events (all 9 sources)",
+    "step4_commit": "Commits updated data/events.json back to main branch [skip ci]",
+    "step5_deploy": "Vercel detects push → auto-redeploys with fresh events data"
   },
-  "crontab": {
-    "schedule": "0 8 * * *",
-    "command": "npm run fetch:events"
+  "env_vars_required_in_vercel": [
+    "CRON_SECRET (arbitrary string — set in Vercel dashboard)",
+    "GH_DISPATCH_TOKEN (GitHub PAT with repo + workflow scopes)",
+    "GH_REPO_OWNER (e.g. whattodo-pt)",
+    "GH_REPO_NAME (e.g. what-to-do-website)"
+  ],
+  "local_run": {
+    "command": "npm run fetch:events",
+    "description": "Runs all scrapers locally and overwrites data/events.json"
   }
 }

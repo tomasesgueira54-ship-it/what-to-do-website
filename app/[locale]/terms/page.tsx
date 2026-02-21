@@ -40,7 +40,7 @@ export default async function TermsPage({
         },
         {
           title: "7. Subscrição de Newsletter",
-          body: "Ao subscrever a nossa newsletter, concorda em receber comunicações periódicas sobre eventos e conteúdos culturais em Lisboa. Pode cancelar a subscrição a qualquer momento através do link de unsubscribe presente em cada email.",
+          body: "Ao subscrever a nossa newsletter, concorda em receber comunicações periódicas sobre eventos e conteúdos culturais em Lisboa. Pode cancelar a subscrição a qualquer momento através do link de cancelamento presente em cada e-mail.",
         },
         {
           title: "8. Alterações aos Termos",
@@ -97,13 +97,17 @@ export default async function TermsPage({
           {isPt ? "Termos e Condições" : "Terms and Conditions"}
         </h1>
         <p className="text-brand-grey text-sm mb-10">
-          {isPt ? "Última atualização: janeiro de 2025" : "Last updated: January 2025"}
+          {isPt
+            ? "Última atualização: fevereiro de 2026"
+            : "Last updated: February 2026"}
         </p>
 
         <div className="space-y-8">
           {sections.map((s) => (
             <div key={s.title}>
-              <h2 className="text-white font-semibold text-lg mb-2">{s.title}</h2>
+              <h2 className="text-white font-semibold text-lg mb-2">
+                {s.title}
+              </h2>
               <p className="text-brand-grey leading-relaxed">{s.body}</p>
             </div>
           ))}
@@ -113,7 +117,7 @@ export default async function TermsPage({
           href={`/${locale}`}
           className="inline-block mt-12 text-brand-red hover:text-white transition-colors"
         >
-          {isPt ? "← Voltar ao início" : "← Back to home"}
+          {isPt ? "← Voltar à página inicial" : "← Back to homepage"}
         </Link>
       </div>
     </section>

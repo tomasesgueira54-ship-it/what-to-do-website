@@ -272,11 +272,14 @@ async function enrich() {
             }
         }
 
-        // prefer source-aware detection, fall back to generic
+        // prefer source-aware detection, fall back to generic and finally default to Outro
         if (!copy.category) {
             const c = detectCategoryBySource(copy) || detectCategory(copy);
             if (c) {
                 copy.category = c as any;
+                updatedCategory++;
+            } else {
+                copy.category = 'Outro' as any;
                 updatedCategory++;
             }
         }

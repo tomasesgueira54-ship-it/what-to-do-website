@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import EventCard from "@/components/EventCard";
-import { Event, EventCategory, EventSource, MusicGenre } from "@/data/types";
+import { Event, EventCategory, MusicGenre } from "@/data/types";
 import { useFavorites } from "@/lib/use-favorites";
 import { useTranslations } from "@/lib/use-translations";
 import {
@@ -294,10 +295,13 @@ export default function EventsClient({
   locale = "pt",
   initialQuery = "",
 }: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const hasHydratedFromUrl = useRef(false);
   const t = useTranslations(locale);
   const labels = {
     musicGenre: t("events.music_genre", "Género de Música"),
-    source: t("events.source", "Fonte"),
     upcoming: t("events.upcoming_events", "Próximos Eventos"),
     filters: t("events.filters", "Filtros"),
     clearAll: t("events.clear_all", "Limpar tudo"),
@@ -316,6 +320,10 @@ export default function EventsClient({
     clearFilters: t("events.clear_filters", "Tentar remover filtros"),
     favoritesOnly: t("events.favorites_only", "Só favoritos"),
     loadingMap: t("events.loading_map", "Carregando mapa..."),
+    openFilters: t("events.open_filters", "Abrir filtros"),
+    closeFilters: t("events.close_filters", "Fechar filtros"),
+    activeFilters: t("events.active_filters", "Filtros ativos"),
+    removeFilter: t("events.remove_filter", "Remover filtro"),
   };
 
   const [query, setQuery] = useState(initialQuery);
@@ -324,22 +332,14 @@ export default function EventsClient({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [sort, setSort] = useState<"asc" | "desc">("asc");
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const { favoriteIds, favoriteCount } = useFavorites();
   const [selectedCategories, setSelectedCategories] = useState<
     Set<EventCategory>
   >(new Set());
-  const [selectedSources, setSelectedSources] = useState<Set<EventSource>>(
-    new Set(),
-  );
   const [selectedGenres, setSelectedGenres] = useState<Set<MusicGenre>>(
     new Set(),
   );
-
-  const uniqueSources = useMemo(() => {
-    const src = new Set<EventSource>();
-    events.forEach((e) => src.add(e.source));
-    return Array.from(src).sort();
-  }, [events]);
 
   // Get unique categories
   const uniqueCategories = useMemo(() => {
@@ -367,42 +367,129 @@ export default function EventsClient({
     return Array.from(genres).sort();
   }, [events]);
 
-  const toggleCategory = (category: EventCategory) => {
-    const newCategories = new Set(selectedCategories);
-    if (newCategories.has(category)) {
-      newCategories.delete(category);
-    } else {
-      newCategories.add(category);
-    }
-    setSelectedCategories(newCategories);
-  };
+  const toggleCategory = useCallback((category: EventCategory) => {
+    setSelectedCategories((currentCategories) => {
+      const newCategories = new Set(currentCategories);
+      if (newCategories.has(category)) {
+        newCategories.delete(category);
+      } else {
+        newCategories.add(category);
+      }
+      return newCategories;
+    });
+  }, []);
 
-  const toggleSource = (source: EventSource) => {
-    const newSources = new Set(selectedSources);
-    if (newSources.has(source)) {
-      newSources.delete(source);
-    } else {
-      newSources.add(source);
-    }
-    setSelectedSources(newSources);
-  };
+  const toggleGenre = useCallback((genre: MusicGenre) => {
+    setSelectedGenres((currentGenres) => {
+      const newGenres = new Set(currentGenres);
+      if (newGenres.has(genre)) {
+        newGenres.delete(genre);
+      } else {
+        newGenres.add(genre);
+      }
+      return newGenres;
+    });
+  }, []);
 
-  const toggleGenre = (genre: MusicGenre) => {
-    const newGenres = new Set(selectedGenres);
-    if (newGenres.has(genre)) {
-      newGenres.delete(genre);
-    } else {
-      newGenres.add(genre);
+  const parseCsvParam = useCallback((value: string | null) => {
+    if (!value) return [] as string[];
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const q = params.get("q")?.trim() || "";
+    const nextStartDate = params.get("date") || "";
+    const nextOnlyFree = params.get("free") === "1";
+    const nextOnlyFavorites = params.get("fav") === "1";
+    const nextSort = params.get("sort") === "desc" ? "desc" : "asc";
+    const nextView = params.get("view") === "map" ? "map" : "grid";
+
+    const categoryValues = parseCsvParam(params.get("cat"));
+    const genreValues = parseCsvParam(params.get("genre"));
+
+    const validCategories = new Set<EventCategory>();
+    categoryValues.forEach((value) => {
+      if (uniqueCategories.includes(value as EventCategory)) {
+        validCategories.add(value as EventCategory);
+      }
+    });
+
+    const validGenres = new Set<MusicGenre>();
+    genreValues.forEach((value) => {
+      if (uniqueGenres.includes(value as MusicGenre)) {
+        validGenres.add(value as MusicGenre);
+      }
+    });
+
+    queueMicrotask(() => {
+      setQuery(q);
+      setStartDate(nextStartDate);
+      setOnlyFree(nextOnlyFree);
+      setOnlyFavorites(nextOnlyFavorites);
+      setSort(nextSort);
+      setViewMode(nextView);
+      setSelectedCategories(validCategories);
+      setSelectedGenres(validGenres);
+      hasHydratedFromUrl.current = true;
+    });
+  }, [
+    initialQuery,
+    parseCsvParam,
+    searchParams,
+    uniqueCategories,
+    uniqueGenres,
+  ]);
+
+  useEffect(() => {
+    if (!hasHydratedFromUrl.current) return;
+
+    const nextParams = new URLSearchParams();
+    const trimmedQuery = query.trim();
+
+    if (trimmedQuery) nextParams.set("q", trimmedQuery);
+    if (startDate) nextParams.set("date", startDate);
+    if (onlyFree) nextParams.set("free", "1");
+    if (onlyFavorites) nextParams.set("fav", "1");
+    if (selectedCategories.size > 0) {
+      nextParams.set("cat", Array.from(selectedCategories).join(","));
     }
-    setSelectedGenres(newGenres);
-  };
+    if (selectedGenres.size > 0) {
+      nextParams.set("genre", Array.from(selectedGenres).join(","));
+    }
+    if (sort !== "asc") nextParams.set("sort", sort);
+    if (viewMode !== "grid") nextParams.set("view", viewMode);
+
+    const nextQueryString = nextParams.toString();
+    const currentQueryString = searchParams.toString();
+    if (nextQueryString === currentQueryString) return;
+
+    router.replace(
+      nextQueryString ? `${pathname}?${nextQueryString}` : pathname,
+      { scroll: false },
+    );
+  }, [
+    pathname,
+    query,
+    onlyFavorites,
+    onlyFree,
+    router,
+    searchParams,
+    selectedCategories,
+    selectedGenres,
+    sort,
+    startDate,
+    viewMode,
+  ]);
 
   const hasActiveFilters =
-    query ||
+    query.trim() ||
     startDate ||
     onlyFree ||
     onlyFavorites ||
-    selectedSources.size > 0 ||
     selectedCategories.size > 0 ||
     selectedGenres.size > 0;
 
@@ -411,10 +498,77 @@ export default function EventsClient({
     setStartDate("");
     setOnlyFree(false);
     setOnlyFavorites(false);
-    setSelectedSources(new Set());
     setSelectedCategories(new Set());
     setSelectedGenres(new Set());
   };
+
+  const activeFilterPills = useMemo(() => {
+    const pills: Array<{ id: string; label: string; onRemove: () => void }> =
+      [];
+
+    if (query.trim()) {
+      pills.push({
+        id: "query",
+        label: `${labels.searchPlaceholder}: ${query.trim()}`,
+        onRemove: () => setQuery(""),
+      });
+    }
+
+    if (startDate) {
+      pills.push({
+        id: "date",
+        label: `${labels.minDate}: ${startDate}`,
+        onRemove: () => setStartDate(""),
+      });
+    }
+
+    if (onlyFree) {
+      pills.push({
+        id: "free",
+        label: labels.freeOnly,
+        onRemove: () => setOnlyFree(false),
+      });
+    }
+
+    if (onlyFavorites) {
+      pills.push({
+        id: "favorites",
+        label: labels.favoritesOnly,
+        onRemove: () => setOnlyFavorites(false),
+      });
+    }
+
+    selectedCategories.forEach((category) => {
+      pills.push({
+        id: `cat-${category}`,
+        label: category,
+        onRemove: () => toggleCategory(category),
+      });
+    });
+
+    selectedGenres.forEach((genre) => {
+      pills.push({
+        id: `genre-${genre}`,
+        label: genre,
+        onRemove: () => toggleGenre(genre),
+      });
+    });
+
+    return pills;
+  }, [
+    labels.favoritesOnly,
+    labels.freeOnly,
+    labels.minDate,
+    labels.searchPlaceholder,
+    onlyFavorites,
+    onlyFree,
+    query,
+    selectedCategories,
+    selectedGenres,
+    startDate,
+    toggleCategory,
+    toggleGenre,
+  ]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -433,9 +587,6 @@ export default function EventsClient({
             e.category ||
             getCategoryForEvent(e.title, e.description, e.location);
           if (!selectedCategories.has(eventCat)) return false;
-        }
-        if (selectedSources.size > 0) {
-          if (!selectedSources.has(e.source)) return false;
         }
         if (selectedGenres.size > 0) {
           const eventCat =
@@ -465,22 +616,200 @@ export default function EventsClient({
     favoriteIds,
     startDate,
     sort,
-    selectedSources,
     selectedCategories,
     selectedGenres,
   ]);
 
+  const filtersContent = (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-brand-red lg:col-span-1">
+          <span className="sr-only">{labels.searchPlaceholder}</span>
+          <FaSearch className="text-brand-grey flex-shrink-0" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={labels.searchPlaceholder}
+            aria-label={labels.searchPlaceholder}
+            className="flex-1 bg-transparent text-white outline-none text-sm"
+          />
+          {query && (
+            <button
+              className="text-brand-grey hover:text-white flex-shrink-0"
+              onClick={() => setQuery("")}
+              aria-label={labels.clearSearch}
+            >
+              <FaTimes size={16} />
+            </button>
+          )}
+        </label>
+
+        <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
+          <span className="text-xs font-bold">{labels.minDate}</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="bg-transparent border-b border-brand-grey-dark/50 px-0 py-1 text-white focus:outline-none focus:border-brand-red"
+          />
+        </label>
+
+        <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 text-sm text-white lg:col-span-1 cursor-pointer hover:border-brand-red transition-colors">
+          <input
+            type="checkbox"
+            checked={onlyFree}
+            onChange={(e) => setOnlyFree(e.target.checked)}
+            className="accent-brand-red w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm">{labels.freeOnly}</span>
+        </label>
+
+        <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 text-sm text-white lg:col-span-1 cursor-pointer hover:border-brand-red transition-colors">
+          <input
+            type="checkbox"
+            checked={onlyFavorites}
+            onChange={(e) => setOnlyFavorites(e.target.checked)}
+            className="accent-brand-red w-4 h-4 cursor-pointer"
+          />
+          <span className="text-sm flex items-center gap-1.5">
+            <FaHeart className="text-brand-red" size={12} />
+            {labels.favoritesOnly}
+          </span>
+        </label>
+
+        <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
+          <span className="text-xs font-bold">{labels.sortLabel}</span>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as "asc" | "desc")}
+            className="bg-transparent border-b border-brand-grey-dark/50 px-0 py-1 text-white focus:outline-none focus:border-brand-red"
+          >
+            <option value="asc">{labels.sortAsc}</option>
+            <option value="desc">{labels.sortDesc}</option>
+          </select>
+        </label>
+      </div>
+
+      {activeFilterPills.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="text-[11px] text-brand-grey uppercase tracking-widest font-bold mr-1 py-1">
+            {labels.activeFilters}
+          </span>
+          {activeFilterPills.map((pill) => (
+            <button
+              key={pill.id}
+              onClick={pill.onRemove}
+              aria-label={`${labels.removeFilter}: ${pill.label}`}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-grey-dark/60 bg-brand-black px-3 py-1.5 text-xs text-white hover:border-brand-red transition-colors"
+            >
+              <span className="truncate max-w-[220px]">{pill.label}</span>
+              <FaTimes size={10} className="text-brand-grey" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {uniqueCategories.length > 1 && (
+        <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up">
+          <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+            <FaTag size={12} className="text-brand-red" />
+            <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
+              {labels.eventType}
+            </span>
+            <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
+              {selectedCategories.size}
+            </span>
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            {uniqueCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => toggleCategory(category)}
+                aria-pressed={selectedCategories.has(category)}
+                className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
+                  selectedCategories.has(category)
+                    ? "bg-gradient-to-br from-brand-red via-red-600 to-brand-red-light text-white border border-red-500/50 shadow-[0_0_15px_-3px_rgba(220,38,38,0.5)] transform scale-105"
+                    : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-brand-red/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(220,38,38,0.3)] hover:-translate-y-0.5"
+                }`}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-1.5">
+                  {selectedCategories.has(category) && (
+                    <FaCheck size={10} className="animate-scale-in" />
+                  )}
+                  {category}
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(selectedCategories.has("Música") || uniqueGenres.length > 0) &&
+        uniqueGenres.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up delay-100">
+            <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="text-brand-red text-lg">🎵</span>
+              <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
+                {labels.musicGenre}
+              </span>
+              <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
+                {selectedGenres.size}
+              </span>
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {uniqueGenres.map((genre) => (
+                <button
+                  key={genre}
+                  onClick={() => toggleGenre(genre)}
+                  aria-pressed={selectedGenres.has(genre)}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
+                    selectedGenres.has(genre)
+                      ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white border border-purple-500/50 shadow-[0_0_15px_-3px_rgba(147,51,234,0.5)] transform scale-105"
+                      : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-indigo-500/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(99,102,241,0.3)] hover:-translate-y-0.5"
+                  }`}
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-1.5">
+                    {selectedGenres.has(genre) && (
+                      <FaCheck size={10} className="animate-scale-in" />
+                    )}
+                    {genre}
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+    </>
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Filters */}
-      <div className="bg-brand-black-light border border-brand-grey-dark/40 rounded-2xl p-4 md:p-6 shadow-lg">
+      <div className="md:hidden flex items-center justify-between gap-3 rounded-xl border border-brand-grey-dark/40 bg-brand-black-light p-3">
+        <button
+          onClick={() => setIsFilterDrawerOpen(true)}
+          className="inline-flex items-center gap-2 text-sm font-bold text-white"
+        >
+          <FaFilter className="text-brand-red" /> {labels.openFilters}
+        </button>
+        {hasActiveFilters && (
+          <button
+            onClick={clearAllFilters}
+            className="text-brand-grey hover:text-brand-red transition-colors text-xs font-bold flex items-center gap-1"
+          >
+            <FaTimes /> {labels.clearAll}
+          </button>
+        )}
+      </div>
+
+      <div className="hidden md:block bg-brand-black-light border border-brand-grey-dark/40 rounded-2xl p-4 md:p-6 shadow-lg">
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2 text-brand-grey uppercase tracking-widest text-xs font-bold">
             <FaFilter /> {labels.filters}
             {hasActiveFilters && (
               <span className="bg-brand-red text-white px-2 py-1 rounded text-xs font-bold">
                 {selectedCategories.size +
-                  selectedSources.size +
                   selectedGenres.size +
                   (query ? 1 : 0) +
                   (startDate ? 1 : 0) +
@@ -498,193 +827,33 @@ export default function EventsClient({
             </button>
           )}
         </div>
+        {filtersContent}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search Filter */}
-          <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-brand-red lg:col-span-1">
-            <span className="sr-only">{labels.searchPlaceholder}</span>
-            <FaSearch className="text-brand-grey flex-shrink-0" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={labels.searchPlaceholder}
-              aria-label={labels.searchPlaceholder}
-              className="flex-1 bg-transparent text-white outline-none text-sm"
-            />
-            {query && (
+      {isFilterDrawerOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            aria-label={labels.closeFilters}
+            onClick={() => setIsFilterDrawerOpen(false)}
+            className="absolute inset-0 bg-black/70"
+          />
+          <div className="absolute right-0 top-0 h-full w-[90%] max-w-md bg-brand-black-light border-l border-brand-grey-dark/40 shadow-2xl overflow-y-auto p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-brand-grey uppercase tracking-widest text-xs font-bold">
+                <FaFilter /> {labels.filters}
+              </div>
               <button
-                className="text-brand-grey hover:text-white flex-shrink-0"
-                onClick={() => setQuery("")}
-                aria-label={labels.clearSearch}
+                onClick={() => setIsFilterDrawerOpen(false)}
+                className="text-brand-grey hover:text-white"
+                aria-label={labels.closeFilters}
               >
                 <FaTimes size={16} />
               </button>
-            )}
-          </label>
-
-          {/* Date Filter */}
-          <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
-            <span className="text-xs font-bold">{labels.minDate}</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent border-b border-brand-grey-dark/50 px-0 py-1 text-white focus:outline-none focus:border-brand-red"
-            />
-          </label>
-
-          {/* Free Events Filter */}
-          <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 text-sm text-white lg:col-span-1 cursor-pointer hover:border-brand-red transition-colors">
-            <input
-              type="checkbox"
-              checked={onlyFree}
-              onChange={(e) => setOnlyFree(e.target.checked)}
-              className="accent-brand-red w-4 h-4 cursor-pointer"
-            />
-            <span className="text-sm">{labels.freeOnly}</span>
-          </label>
-
-          <label className="flex items-center gap-3 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 text-sm text-white lg:col-span-1 cursor-pointer hover:border-brand-red transition-colors">
-            <input
-              type="checkbox"
-              checked={onlyFavorites}
-              onChange={(e) => setOnlyFavorites(e.target.checked)}
-              className="accent-brand-red w-4 h-4 cursor-pointer"
-            />
-            <span className="text-sm flex items-center gap-1.5">
-              <FaHeart className="text-brand-red" size={12} />
-              {labels.favoritesOnly}
-            </span>
-          </label>
-
-          {/* Sort Filter */}
-          <label className="flex flex-col text-sm text-brand-grey gap-2 bg-brand-black border border-brand-grey-dark rounded-xl px-4 py-3 lg:col-span-1">
-            <span className="text-xs font-bold">{labels.sortLabel}</span>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as "asc" | "desc")}
-              className="bg-transparent border-b border-brand-grey-dark/50 px-0 py-1 text-white focus:outline-none focus:border-brand-red"
-            >
-              <option value="asc">{labels.sortAsc}</option>
-              <option value="desc">{labels.sortDesc}</option>
-            </select>
-          </label>
+            </div>
+            {filtersContent}
+          </div>
         </div>
-
-        {/* Source Filter - Multi-select */}
-        {uniqueSources.length > 1 && (
-          <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up">
-            <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-              <FaTag size={12} className="text-brand-red" />
-              <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
-                {labels.source}
-              </span>
-              <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
-                {selectedSources.size}
-              </span>
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {uniqueSources.map((source) => (
-                <button
-                  key={source}
-                  onClick={() => toggleSource(source)}
-                  aria-pressed={selectedSources.has(source)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
-                    selectedSources.has(source)
-                      ? "bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white border border-cyan-500/50 shadow-[0_0_15px_-3px_rgba(20,184,166,0.5)] transform scale-105"
-                      : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-emerald-500/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(16,185,129,0.3)] hover:-translate-y-0.5"
-                  }`}
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-1.5">
-                    {selectedSources.has(source) && (
-                      <FaCheck size={10} className="animate-scale-in" />
-                    )}
-                    {source}
-                  </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Category Filter - Multi-select */}
-        {uniqueCategories.length > 1 && (
-          <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up">
-            <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-              <FaTag size={12} className="text-brand-red" />
-              <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
-                {labels.eventType}
-              </span>
-              <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
-                {selectedCategories.size}
-              </span>
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {uniqueCategories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => toggleCategory(category)}
-                  aria-pressed={selectedCategories.has(category)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
-                    selectedCategories.has(category)
-                      ? "bg-gradient-to-br from-brand-red via-red-600 to-brand-red-light text-white border border-red-500/50 shadow-[0_0_15px_-3px_rgba(220,38,38,0.5)] transform scale-105"
-                      : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-brand-red/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(220,38,38,0.3)] hover:-translate-y-0.5"
-                  }`}
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-1.5">
-                    {selectedCategories.has(category) && (
-                      <FaCheck size={10} className="animate-scale-in" />
-                    )}
-                    {category}
-                  </span>
-                  {/* Hover shine effect */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Music Genre Filter - Multi-select (only show when Música is selected or available) */}
-        {(selectedCategories.has("Música") || uniqueGenres.length > 0) &&
-          uniqueGenres.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-brand-grey-dark/30 animate-fade-in-up delay-100">
-              <p className="text-xs text-brand-grey font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span className="text-brand-red text-lg">🎵</span>
-                <span className="bg-gradient-to-r from-brand-grey to-white bg-clip-text text-transparent">
-                  {labels.musicGenre}
-                </span>
-                <span className="bg-brand-grey-dark/50 text-brand-grey-light px-1.5 py-0.5 rounded-full text-[10px]">
-                  {selectedGenres.size}
-                </span>
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {uniqueGenres.map((genre) => (
-                  <button
-                    key={genre}
-                    onClick={() => toggleGenre(genre)}
-                    aria-pressed={selectedGenres.has(genre)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap relative overflow-hidden group ${
-                      selectedGenres.has(genre)
-                        ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white border border-purple-500/50 shadow-[0_0_15px_-3px_rgba(147,51,234,0.5)] transform scale-105"
-                        : "bg-brand-black-light border border-brand-grey-dark/60 text-brand-grey hover:border-indigo-500/70 hover:text-white hover:shadow-[0_0_12px_-5px_rgba(99,102,241,0.3)] hover:-translate-y-0.5"
-                    }`}
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-1.5">
-                      {selectedGenres.has(genre) && (
-                        <FaCheck size={10} className="animate-scale-in" />
-                      )}
-                      {genre}
-                    </span>
-                    {/* Hover shine effect */}
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-      </div>
+      )}
 
       {/* Results */}
       <div className="flex items-center justify-between gap-2 mb-2">

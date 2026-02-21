@@ -20,6 +20,7 @@ export default function MyAgendaClient({
 }: MyAgendaClientProps) {
   const { favoriteIds, isHydrated, clearFavorites } = useFavorites();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const t = useTranslations(locale);
 
   useEffect(() => {
@@ -101,29 +102,57 @@ export default function MyAgendaClient({
         </div>
         <button
           type="button"
-          onClick={() => {
-            const confirmed = window.confirm(
-              t(
-                "my_agenda.confirm_clear",
-                "Do you want to remove all favorites?",
-              ),
-            );
-            if (confirmed) {
-              clearFavorites();
-              setToastMessage(
-                t(
-                  "my_agenda.cleared_success",
-                  "Favorites cleared successfully.",
-                ),
-              );
-            }
-          }}
+          onClick={() => setShowClearConfirm(true)}
           className="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-lg border border-brand-grey-dark/50 text-brand-grey hover:text-white hover:border-brand-red transition-colors"
         >
           <FaTrashAlt size={12} />
           {t("my_agenda.clear_all", "Clear all")}
         </button>
       </div>
+
+      {/* Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-brand-black-light border border-brand-grey-dark/40 rounded-xl p-6 max-w-sm w-full space-y-4">
+            <h3 className="text-lg font-bold text-white">
+              {t(
+                "my_agenda.confirm_clear_title",
+                "Remove all favorites?",
+              )}
+            </h3>
+            <p className="text-brand-grey text-sm">
+              {t(
+                "my_agenda.confirm_clear_desc",
+                "This will remove all saved events from your agenda. This action cannot be undone.",
+              )}
+            </p>
+            <div className="flex gap-3 justify-end pt-4">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="px-4 py-2 rounded-lg border border-brand-grey-dark text-brand-grey hover:text-white transition-colors text-sm"
+              >
+                {t("my_agenda.cancel", "Cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  clearFavorites();
+                  setShowClearConfirm(false);
+                  setToastMessage(
+                    t(
+                      "my_agenda.cleared_success",
+                      "Favorites cleared successfully.",
+                    ),
+                  );
+                }}
+                className="px-4 py-2 rounded-lg bg-brand-red text-white hover:bg-brand-red-light transition-colors text-sm font-semibold flex items-center gap-2"
+              >
+                <FaTrashAlt size={12} />
+                {t("my_agenda.clear_all_confirm", "Clear all")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {favoriteEvents.map((event) => (

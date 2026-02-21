@@ -5,15 +5,15 @@ import { defaultLocale, locales, type Locale } from "@/i18n.config";
 const translations = {
   pt: {
     title: "Sobre Nós",
-    subtitle: "Conheça a história por trás do What To Do",
-    back: "Voltar",
-    mission: "Nossa Missão",
+    subtitle: "Conhece a história por trás do What To Do",
+    back: "Voltar à página inicial",
+    mission: "A Nossa Missão",
     missionText:
-      "Queremos ajudar você a descobrir o melhor que Lisboa tem para oferecer. Através de um podcast inspirador e um blog completo, compartilhamos histórias, dicas práticas e experiências únicas que transformam sua forma de explorar a cidade.",
-    team: "O Time",
+      "Queremos ajudar-te a descobrir o melhor que Lisboa tem para oferecer. Através de um podcast inspirador e de um blog completo, partilhamos histórias, dicas práticas e experiências únicas que transformam a forma como exploras a cidade.",
+    team: "A Equipa",
     teamText:
-      "Somos uma pequena equipe apaixonada por Lisboa e pela criação de conteúdo de qualidade. Cada episódio e artigo é feito com cuidado para oferecer valor real aos nossos ouvintes e leitores.",
-    values: "Nossos Valores",
+      "Somos uma pequena equipa apaixonada por Lisboa e pela criação de conteúdo de qualidade. Cada episódio e artigo é feito com cuidado para oferecer valor real aos nossos ouvintes e leitores.",
+    values: "Os Nossos Valores",
     authenticity: "Autenticidade",
     community: "Comunidade",
     quality: "Qualidade",
@@ -21,7 +21,7 @@ const translations = {
   en: {
     title: "About Us",
     subtitle: "Get to know the story behind What To Do",
-    back: "Back",
+    back: "Back to homepage",
     mission: "Our Mission",
     missionText:
       "We want to help you discover the best that Lisbon has to offer. Through an inspiring podcast and a comprehensive blog, we share stories, practical tips and unique experiences that transform the way you explore the city.",
@@ -54,9 +54,10 @@ export default async function AboutPage({
         <div className="flex items-center mb-6">
           <Link
             href={`/${locale}`}
+            aria-label={t.back}
             className="text-brand-red hover:text-brand-red-light transition-colors flex items-center gap-2"
           >
-            <FaArrowLeft className="text-sm" />
+            <FaArrowLeft className="text-sm" aria-hidden="true" />
             {t.back}
           </Link>
         </div>
@@ -68,10 +69,16 @@ export default async function AboutPage({
       </div>
 
       {/* Mission Section */}
-      <section className="mb-16 pb-8 border-b border-brand-grey/20">
+      <section
+        className="mb-16 pb-8 border-b border-brand-grey/20"
+        aria-labelledby="about-mission-title"
+      >
         <div className="flex items-center gap-3 mb-6">
-          <FaPodcast className="text-3xl text-brand-red" />
-          <h2 className="text-3xl font-bold font-display text-brand-red">
+          <FaPodcast className="text-3xl text-brand-red" aria-hidden="true" />
+          <h2
+            id="about-mission-title"
+            className="text-3xl font-bold font-display text-brand-red"
+          >
             {t.mission}
           </h2>
         </div>
@@ -81,10 +88,16 @@ export default async function AboutPage({
       </section>
 
       {/* Team Section */}
-      <section className="mb-16 pb-8 border-b border-brand-grey/20">
+      <section
+        className="mb-16 pb-8 border-b border-brand-grey/20"
+        aria-labelledby="about-team-title"
+      >
         <div className="flex items-center gap-3 mb-6">
-          <FaUsers className="text-3xl text-brand-red" />
-          <h2 className="text-3xl font-bold font-display text-brand-red">
+          <FaUsers className="text-3xl text-brand-red" aria-hidden="true" />
+          <h2
+            id="about-team-title"
+            className="text-3xl font-bold font-display text-brand-red"
+          >
             {t.team}
           </h2>
         </div>
@@ -94,10 +107,13 @@ export default async function AboutPage({
       </section>
 
       {/* Values Section */}
-      <section className="mb-16">
+      <section className="mb-16" aria-labelledby="about-values-title">
         <div className="flex items-center gap-3 mb-6">
-          <FaHeart className="text-3xl text-brand-red" />
-          <h2 className="text-3xl font-bold font-display text-brand-red">
+          <FaHeart className="text-3xl text-brand-red" aria-hidden="true" />
+          <h2
+            id="about-values-title"
+            className="text-3xl font-bold font-display text-brand-red"
+          >
             {t.values}
           </h2>
         </div>

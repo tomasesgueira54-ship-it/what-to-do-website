@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { Event } from '../types';
-import { DEFAULT_UA, makeEvent, dismissCookies, cleanText, toAbsolute, safeDate } from './utils';
+import { DEFAULT_UA, makeEvent, dismissCookies, cleanText, toAbsolute, safeDate, inferEndDateFromText, applyDefaultDuration } from './utils';
 
 const SHOTGUN_MONTHS: Record<string, number> = {
     jan: 0,
@@ -117,7 +117,16 @@ function parseShotgunEndDate(input?: string): string {
 }
 
 async function hydrateShotgunDetails(events: Event[]): Promise<void> {
-    const targets = events.filter((e) => !e.description || e.description === 'Ver detalhes' || !e.image || e.image.includes('placeholder'));
+    const targets = events.filter(
+        (e) =>
+            !e.description
+            || e.description === 'Ver detalhes'
+            || !e.image
+            || e.image.includes('placeholder')
+            || !e.date
+            || !e.endDate
+            || !e.price,
+    );
     if (!targets.length) return;
 
     const concurrency = 6;
@@ -191,9 +200,17 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
                         $('body').text();
                     const match = priceText.replace(/\s+/g, ' ').match(/(Free|Gratuito|Grátis)|(\d+[.,]?\d*)\s*€?/i);
                     if (match) {
-                        if (match[1]) ev.price = 'Free';
+                        if (match[1]) ev.price = 'Grátis';
                         else if (match[2]) ev.price = `${match[2].replace(',', '.')}€`;
                     }
+                }
+
+                // New Heuristic Phase 2: Infer End Date (HTTP)
+                if (ev.date && !ev.endDate) {
+                    const textScan = (ev.description || '') + ' ' + $('body').text();
+                    const inferred = inferEndDateFromText(textScan, new Date(ev.date));
+                    if (inferred) ev.endDate = inferred.toISOString();
+                    else applyDefaultDuration(ev, 6);
                 }
 
                 if (!ev.image || ev.image.includes('placeholder')) {
@@ -212,17 +229,28 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
 
     const stillMissing = targets.filter(
-        (e) => !e.description || e.description === 'Ver detalhes' || !e.price || !e.image || e.image.includes('placeholder'),
+        (e) =>
+            !e.description
+            || e.description === 'Ver detalhes'
+            || !e.price
+            || !e.image
+            || e.image.includes('placeholder')
+            || !e.date
+            || !e.endDate,
     );
     if (!stillMissing.length) return;
 
     let browser;
     try {
         browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage({ userAgent: DEFAULT_UA });
+        let page = await browser.newPage({ userAgent: DEFAULT_UA });
 
         for (const ev of stillMissing) {
             try {
+                if (page.isClosed()) {
+                    page = await browser.newPage({ userAgent: DEFAULT_UA });
+                }
+
                 await page.goto(ev.url, { waitUntil: 'domcontentloaded', timeout: 20000 });
                 await page.waitForTimeout(800);
 
@@ -255,13 +283,41 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
                     if (normalized) ev.date = normalized;
                 }
 
+                if (!ev.endDate) {
+                    const text = await page.evaluate(() => {
+                        const ld = document.querySelector('script[type="application/ld+json"]') as HTMLScriptElement | null;
+                        if (ld?.textContent) {
+                            try {
+                                const data = JSON.parse(ld.textContent);
+                                const arr = Array.isArray(data) ? data : [data];
+                                const found = arr.find((d: any) => d.endDate);
+                                if (found?.endDate) return found.endDate as string;
+                            } catch {
+                                /* ignore */
+                            }
+                        }
+                        const meta = document.querySelector('meta[itemprop="endDate"], meta[property="event:end_time"], meta[name="endDate"]') as HTMLMetaElement | null;
+                        return meta?.content || '';
+                    });
+                    const normalizedEnd = safeDate(text || undefined);
+                    if (normalizedEnd) ev.endDate = normalizedEnd;
+                }
+
                 if (!ev.price) {
                     const text = await page.evaluate(() => document.body.innerText || '');
                     const match = text.replace(/\s+/g, ' ').match(/(Free|Gratuito|Grátis)|(\d+[.,]?\d*)\s*€?/i);
                     if (match) {
-                        if (match[1]) ev.price = 'Free';
+                        if (match[1]) ev.price = 'Grátis';
                         else if (match[2]) ev.price = `${match[2].replace(',', '.')}€`;
                     }
+                }
+
+                // New Heuristic Phase 2: Infer End Date (Playwright)
+                if (ev.date && !ev.endDate) {
+                    const text = await page.evaluate(() => document.body.innerText || '');
+                    const inferred = inferEndDateFromText(ev.description + ' ' + text, new Date(ev.date));
+                    if (inferred) ev.endDate = inferred.toISOString();
+                    else applyDefaultDuration(ev, 6);
                 }
 
                 if (!ev.image || ev.image.includes('placeholder')) {
@@ -279,7 +335,13 @@ async function hydrateShotgunDetails(events: Event[]): Promise<void> {
     } catch {
         /* swallow */
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            try {
+                await browser.close();
+            } catch {
+                /* ignore close errors */
+            }
+        }
     }
 }
 
@@ -303,10 +365,14 @@ export async function scrapeShotgun(): Promise<Event[]> {
 
     try {
         browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage({ userAgent: DEFAULT_UA });
+        let page = await browser.newPage({ userAgent: DEFAULT_UA });
 
         for (const url of urls) {
             try {
+                if (page.isClosed()) {
+                    page = await browser.newPage({ userAgent: DEFAULT_UA });
+                }
+
                 console.log('[Shotgun] Trying ' + url + '...');
                 await page.goto(url, { waitUntil: 'networkidle', timeout: 25000 });
                 await dismissCookies(page);
@@ -396,12 +462,26 @@ export async function scrapeShotgun(): Promise<Event[]> {
                 }
             } catch (err: any) {
                 console.warn('[Shotgun] ' + url + ': ' + (err.message || '').substring(0, 50));
+                try {
+                    if (!page.isClosed()) {
+                        await page.close();
+                    }
+                } catch {
+                    /* ignore close errors */
+                }
+                page = await browser.newPage({ userAgent: DEFAULT_UA });
             }
         }
     } catch (err: any) {
         console.warn('[Shotgun] Browser bootstrap: ' + (err.message || '').substring(0, 60));
     } finally {
-        if (browser) await browser.close();
+        if (browser) {
+            try {
+                await browser.close();
+            } catch {
+                /* ignore close errors */
+            }
+        }
     }
 
     const events = Array.from(byUrl.values());

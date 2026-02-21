@@ -2,13 +2,13 @@
 
 import AudioPlayer from "@/components/AudioPlayer";
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaArrowLeft,
   FaClock,
   FaListUl,
   FaFileAlt,
   FaUser,
-  FaVideo,
 } from "react-icons/fa";
 import { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
@@ -27,21 +27,23 @@ export default function EpisodeDetailClient({
   const hasPlayableAudio = /\.(mp3|wav|ogg|m4a|aac|webm)(\?.*)?$/i.test(
     episode.audioUrl || "",
   );
-  const [activeTab, setActiveTab] = useState<"shownotes" | "transcript">(
-    "shownotes",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "shownotes" | "transcript" | "flashcards" | "article" | "mindmap"
+  >("shownotes");
   const { seek, playEpisode, currentEpisode, isPlaying } = useAudio();
   const hasShowNotes =
     Array.isArray(episode.showNotes) && episode.showNotes.length > 0;
   const hasTranscript =
     Array.isArray(episode.transcript) && episode.transcript.length > 0;
-  const hasSupplementalContent = hasShowNotes || hasTranscript;
+  const hasFlashcards =
+    Array.isArray(episode.flashcards) && episode.flashcards.length > 0;
+  const hasArticle = !!episode.longDescription;
+  const hasMindMap = !!episode.comparisonTable || !!episode.mindMapUrl;
+  const hasSupplementalContent =
+    hasShowNotes || hasTranscript || hasFlashcards || hasArticle || hasMindMap;
 
-  const embedUrl = episode.videoUrl
-    ? episode.videoUrl
-        .replace("watch?v=", "embed/")
-        .replace("youtu.be/", "www.youtube.com/embed/")
-    : "";
+  // video disabled
+  const embedUrl = "";
 
   const handleJumpToTime = (seconds: number) => {
     if (currentEpisode?.id !== episode.id) {
@@ -56,13 +58,25 @@ export default function EpisodeDetailClient({
   return (
     <section className="py-16">
       <div className="container mx-auto px-4 max-w-6xl">
-        <Link
-          href={`/${locale}/episodes`}
-          className="inline-flex items-center text-brand-grey hover:text-brand-red mb-8 transition-colors"
-        >
-          <FaArrowLeft className="mr-2" />
-          {isPt ? "Voltar aos episódios" : "Back to episodes"}
-        </Link>
+        <nav className="flex items-center gap-2 text-sm text-brand-grey mb-8 flex-wrap">
+          <Link
+            href={`/${locale}`}
+            className="hover:text-brand-red transition-colors"
+          >
+            {isPt ? "Início" : "Home"}
+          </Link>
+          <span className="text-brand-grey-dark">/</span>
+          <Link
+            href={`/${locale}/episodes`}
+            className="hover:text-brand-red transition-colors"
+          >
+            {isPt ? "Episódios" : "Episodes"}
+          </Link>
+          <span className="text-brand-grey-dark">/</span>
+          <span className="text-white truncate max-w-[200px]">
+            {episode.title}
+          </span>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
@@ -87,21 +101,7 @@ export default function EpisodeDetailClient({
             </header>
 
             <div className="mb-12">
-              {embedUrl && (
-                <div className="mb-6 bg-brand-grey-dark/30 border border-brand-grey/20 rounded-xl p-4 md:p-6 shadow-lg backdrop-blur-sm">
-                  <h2 className="text-white font-semibold text-xl mb-4 flex items-center gap-2 text-brand-red">
-                    <FaVideo className="text-brand-red" />
-                    {isPt ? "Ver vídeo" : "Watch video"}
-                  </h2>
-                  <iframe
-                    className="w-full aspect-video rounded-lg border border-brand-grey/20 shadow-inner"
-                    src={embedUrl}
-                    title={episode.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
+              {/* video section disabled */}
 
               {hasPlayableAudio ? (
                 <AudioPlayer episode={episode} />
@@ -163,6 +163,54 @@ export default function EpisodeDetailClient({
                   >
                     <FaFileAlt />
                     {isPt ? "Transcrição" : "Transcript"}
+                  </button>
+                )}
+                {hasFlashcards && (
+                  <button
+                    onClick={() => setActiveTab("flashcards")}
+                    role="tab"
+                    id="tab-flashcards"
+                    aria-controls="panel-flashcards"
+                    aria-selected={activeTab === "flashcards"}
+                    className={`pb-4 px-2 font-semibold text-lg flex items-center gap-2 transition-colors relative ${
+                      activeTab === "flashcards"
+                        ? "text-brand-red border-b-2 border-brand-red"
+                        : "text-brand-grey hover:text-white"
+                    }`}
+                  >
+                    📚 {isPt ? "Flashcards" : "Flashcards"}
+                  </button>
+                )}
+                {hasArticle && (
+                  <button
+                    onClick={() => setActiveTab("article")}
+                    role="tab"
+                    id="tab-article"
+                    aria-controls="panel-article"
+                    aria-selected={activeTab === "article"}
+                    className={`pb-4 px-2 font-semibold text-lg flex items-center gap-2 transition-colors relative ${
+                      activeTab === "article"
+                        ? "text-brand-red border-b-2 border-brand-red"
+                        : "text-brand-grey hover:text-white"
+                    }`}
+                  >
+                    📝 {isPt ? "Artigo" : "Article"}
+                  </button>
+                )}
+                {hasMindMap && (
+                  <button
+                    onClick={() => setActiveTab("mindmap")}
+                    role="tab"
+                    id="tab-mindmap"
+                    aria-controls="panel-mindmap"
+                    aria-selected={activeTab === "mindmap"}
+                    className={`pb-4 px-2 font-semibold text-lg flex items-center gap-2 transition-colors relative ${
+                      activeTab === "mindmap"
+                        ? "text-brand-red border-b-2 border-brand-red"
+                        : "text-brand-grey hover:text-white"
+                    }`}
+                  >
+                    🧠 {isPt ? "Mind Map" : "Mind Map"}
                   </button>
                 )}
               </div>
@@ -244,6 +292,131 @@ export default function EpisodeDetailClient({
                         ))}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {activeTab === "flashcards" && hasFlashcards && (
+                  <div
+                    className="animate-fade-in space-y-6"
+                    role="tabpanel"
+                    id="panel-flashcards"
+                    aria-labelledby="tab-flashcards"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {episode.flashcards!.map((card, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-brand-grey-dark/30 p-4 rounded-lg border border-brand-grey/20"
+                        >
+                          <p className="font-semibold text-white mb-2">
+                            {card.question}
+                          </p>
+                          <p className="text-brand-grey-light">{card.answer}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "article" && hasArticle && (
+                  <div
+                    className="animate-fade-in space-y-6 prose prose-invert max-w-none"
+                    role="tabpanel"
+                    id="panel-article"
+                    aria-labelledby="tab-article"
+                  >
+                    {episode
+                      .longDescription!.split("\n\n")
+                      .map((block, idx) => {
+                        if (block.trim().startsWith("##")) {
+                          return (
+                            <h3
+                              key={idx}
+                              className="text-2xl font-bold text-white mt-8 mb-4"
+                            >
+                              {block.replace(/^##\s*/, "")}
+                            </h3>
+                          );
+                        }
+                        return (
+                          <p
+                            key={idx}
+                            className="text-brand-grey-light leading-relaxed mb-4"
+                          >
+                            {block}
+                          </p>
+                        );
+                      })}
+                  </div>
+                )}
+
+                {activeTab === "mindmap" && hasMindMap && (
+                  <div
+                    className="space-y-8 animate-fade-in"
+                    role="tabpanel"
+                    id="panel-mindmap"
+                    aria-labelledby="tab-mindmap"
+                  >
+                    {episode.mindMapUrl && (
+                      <div className="bg-white/5 p-4 rounded-xl border border-brand-grey/20 backdrop-blur-sm mb-8">
+                        <h3 className="text-white font-bold mb-4 flex items-center gap-2 text-lg">
+                          Mind Map Visual
+                        </h3>
+                        <div className="relative w-full aspect-video bg-black/40 rounded-lg overflow-hidden border border-white/5">
+                          <Image
+                            src={episode.mindMapUrl}
+                            alt="Mind Map"
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {episode.comparisonTable && (
+                      <div>
+                        <h3 className="text-white font-bold mb-4 text-lg">
+                          Guia Prático
+                        </h3>
+                        <div className="overflow-hidden rounded-xl border border-brand-grey/20 bg-brand-grey-dark/30 shadow-xl">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                              <thead className="bg-brand-red/90 text-white">
+                                <tr>
+                                  {episode.comparisonTable.headers.map(
+                                    (h, i) => (
+                                      <th
+                                        key={i}
+                                        className="px-6 py-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap"
+                                      >
+                                        {h}
+                                      </th>
+                                    ),
+                                  )}
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-brand-grey/10">
+                                {episode.comparisonTable.rows.map((row, i) => (
+                                  <tr
+                                    key={i}
+                                    className="hover:bg-brand-grey-dark/50 transition-colors"
+                                  >
+                                    {row.map((cell, j) => (
+                                      <td
+                                        key={j}
+                                        className="px-6 py-4 text-sm text-brand-grey-light border-r border-brand-grey/5 last:border-0"
+                                      >
+                                        {cell}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

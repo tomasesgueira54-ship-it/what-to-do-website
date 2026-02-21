@@ -30,6 +30,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         "/en/blog",
         "/pt/partners",
         "/en/partners",
+        "/pt/contact",
+        "/en/contact",
         "/pt/privacy",
         "/en/privacy",
         "/pt/terms",

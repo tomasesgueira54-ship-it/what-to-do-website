@@ -5,6 +5,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaBars, FaTimes, FaPodcast } from "react-icons/fa";
 import { useTranslations } from "@/lib/use-translations";
+import AuthButton from "@/components/AuthButton";
 
 interface HeaderProps {
   locale?: "pt" | "en";
@@ -52,6 +53,7 @@ export default function Header({ locale = "pt" }: HeaderProps) {
     },
     { name: t("header.blog", "Guides"), href: `/${locale}/blog` },
     { name: t("header.about", "About"), href: `/${locale}/about` },
+    { name: t("header.contact", "Contact"), href: `/${locale}/contact` },
   ];
 
   return (
@@ -92,16 +94,37 @@ export default function Header({ locale = "pt" }: HeaderProps) {
 
             {/* Menu Items */}
             <ul className="flex items-center space-x-8">
-              {menuItems.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className="text-brand-white hover:text-brand-red transition-colors font-medium"
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
+              {menuItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (pathname.includes("/events") &&
+                    item.href.includes("events")) ||
+                  (pathname.includes("/episodes") &&
+                    item.href.includes("episodes")) ||
+                  (pathname.includes("/blog") && item.href.includes("blog")) ||
+                  (pathname.includes("/about") &&
+                    item.href.includes("about")) ||
+                  (pathname.includes("/contact") &&
+                    item.href.includes("contact")) ||
+                  (pathname.includes("/my-agenda") &&
+                    item.href.includes("my-agenda")) ||
+                  (pathname.includes("/partners") &&
+                    item.href.includes("partners"));
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={`transition-colors font-medium pb-1 border-b-2 ${
+                        isActive
+                          ? "text-brand-red border-brand-red"
+                          : "text-brand-white hover:text-brand-red border-transparent"
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Subscribe Button */}
@@ -110,6 +133,9 @@ export default function Header({ locale = "pt" }: HeaderProps) {
                 {t("header.subscribe", "Subscribe")}
               </a>
             </div>
+
+            {/* Auth Button */}
+            <AuthButton locale={locale} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -161,6 +187,11 @@ export default function Header({ locale = "pt" }: HeaderProps) {
                 >
                   {t("header.subscribe", "Subscribe")}
                 </a>
+              </li>
+              <li>
+                <div className="flex justify-center" onClick={toggleMenu}>
+                  <AuthButton locale={locale} />
+                </div>
               </li>
             </ul>
           </div>

@@ -4,26 +4,23 @@ import BlogCard from "@/components/BlogCard";
 import AudioPlayer from "@/components/AudioPlayer";
 import EventCard from "@/components/EventCard";
 import SubscribeForm from "@/components/SubscribeForm";
+import { blogPosts } from "@/data/blog";
 import {
   FaArrowRight,
   FaPodcast,
   FaPenNib,
   FaCalendarAlt,
   FaStar,
-  FaMapMarkedAlt,
 } from "react-icons/fa";
 import { episodes } from "@/data/episodes";
-import fs from "fs/promises";
-import path from "path";
 import { Event } from "@/data/types";
 import { getTranslations } from "@/lib/use-translations";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
+import { getUpcomingEventsCached } from "@/lib/server/events-store";
 
 async function getEvents(): Promise<Event[]> {
   try {
-    const filePath = path.join(process.cwd(), "data", "events.json");
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(fileContent);
+    return await getUpcomingEventsCached();
   } catch {
     return [];
   }
@@ -49,23 +46,15 @@ export default async function Home({ params }: HomePageProps) {
   const featuredEvents = allSorted.slice(0, 2);
   const upcomingEvents = allSorted.slice(2, 6);
 
-  const recentPosts = [
-    {
-      id: "1",
-      title:
-        locale === "pt"
-          ? "Top 5 Rooftops em Lisboa para este Verão"
-          : "Top 5 Lisbon Rooftops for Summer",
-      excerpt:
-        locale === "pt"
-          ? "As melhores vistas da cidade acompanhadas de cocktails incríveis."
-          : "The best city views paired with incredible cocktails.",
-      readTime: "5 min",
-      publishDate: "10 Mar 2026",
-      imageUrl: "/images/placeholder-card.svg",
-      category: locale === "pt" ? "Lifestyle" : "Lifestyle",
-    },
-  ];
+  const recentPosts = blogPosts.slice(0, 3).map((post) => ({
+    id: post.id,
+    title: locale === "pt" ? post.titlePt : post.titleEn,
+    excerpt: locale === "pt" ? post.excerptPt : post.excerptEn,
+    readTime: post.readTime,
+    publishDate: post.publishDate,
+    imageUrl: post.imageUrl || "/images/placeholder-card.svg",
+    category: locale === "pt" ? post.categoryPt : post.categoryEn,
+  }));
 
   return (
     <>
@@ -162,6 +151,81 @@ export default async function Home({ params }: HomePageProps) {
             <Link href={`/${locale}/events`} className="btn-secondary w-full">
               {t.home.featured.view_all}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-brand-black-light border-y border-brand-grey-dark/30">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-2 flex items-center gap-3">
+                <FaPodcast className="text-brand-red" />
+                {locale === "pt" ? "Podcast" : "Podcast"}
+              </h2>
+              <p className="text-brand-grey">
+                {locale === "pt"
+                  ? "Últimos episódios e conversas sobre Lisboa."
+                  : "Latest episodes and conversations about Lisbon."}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/episodes`}
+              className="hidden md:flex items-center text-brand-red hover:text-white transition-colors"
+            >
+              {locale === "pt" ? "Ver episódios" : "View episodes"}
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+
+          {latestEpisode && (
+            <div className="mb-10">
+              <AudioPlayer
+                episode={{
+                  id: latestEpisode.id,
+                  title: latestEpisode.title,
+                  description: latestEpisode.description,
+                  audioUrl: latestEpisode.audioUrl,
+                }}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {recentEpisodes.map((episode) => (
+              <EpisodeCard key={episode.id} episode={episode} locale={locale} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-brand-black">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-2 flex items-center gap-3">
+                <FaPenNib className="text-brand-red" />
+                {locale === "pt" ? "Blog & Guias" : "Blog & Guides"}
+              </h2>
+              <p className="text-brand-grey">
+                {locale === "pt"
+                  ? "Conteúdo editorial para descobrir Lisboa melhor."
+                  : "Editorial content to discover Lisbon better."}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/blog`}
+              className="hidden md:flex items-center text-brand-red hover:text-white transition-colors"
+            >
+              {locale === "pt" ? "Ver blog" : "View blog"}
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recentPosts.map((post) => (
+              <BlogCard key={post.id} post={post} locale={locale} />
+            ))}
           </div>
         </div>
       </section>

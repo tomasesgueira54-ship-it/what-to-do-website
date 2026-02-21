@@ -1,0 +1,4 @@
+
+> what-to-do-website@1.0.0 lint
+> cross-env ESLINT_USE_FLAT_CONFIG=true eslint .
+

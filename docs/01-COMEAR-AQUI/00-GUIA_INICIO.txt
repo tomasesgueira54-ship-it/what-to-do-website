@@ -1,0 +1,80 @@
+================================================================================
+WHAT TO DO - GUIA RÁPIDO (REPOSITÓRIO ATUAL)
+================================================================================
+
+Projeto: "What To Do" (Next.js + TypeScript + Tailwind)
+Objetivo deste ficheiro: arranque rápido para desenvolvimento sem quebrar paths.
+
+ESTRUTURA PRINCIPAL (RESUMO)
+----------------------------
+what-to-do-website/
+├── app/                (rotas Next.js)
+├── components/         (UI reutilizável)
+├── data/               (conteúdo estático, incluindo episódios)
+├── docs/               (guias e documentação)
+├── lib/                (helpers, server, supabase)
+├── messages/           (i18n pt/en)
+├── public/             (assets estáticos)
+│   ├── images/
+│   └── podcasts/
+│       ├── audio/
+│       └── images/
+├── scripts/            (auditoria, qualidade, ingestão)
+└── package.json
+
+PRIMEIRA EXECUÇÃO (LOCAL)
+-------------------------
+1) Instalar dependências
+   npm install
+
+2) Criar variáveis locais
+   - Copiar .env.example para .env.local
+   - Preencher o mínimo necessário para o teu cenário
+
+3) Arrancar em desenvolvimento
+   npm run dev
+
+4) Validar antes de publicar
+   npm run lint
+   npm run build
+
+COMANDOS IMPORTANTES
+--------------------
+npm run dev            -> desenvolvimento local com limpeza de caches
+npm run build          -> build de produção
+npm run start          -> servir build
+npm run lint           -> validação de lint
+npm run health         -> health checks do projeto
+npm run fetch:events   -> recolha de eventos
+npm run enrich:events  -> enriquecimento de eventos
+
+CONVENÇÕES DE ASSETS (PODCAST)
+------------------------------
+- Banner fixo da página de podcast:
+  public/podcasts/images/podcast-banner.png
+
+- Imagem por episódio (cards/detail/metadata do episódio):
+  data/episodes.ts -> campo imageUrl de cada episódio
+
+- Exemplo episódio 1:
+  /podcasts/images/podcast-1-launch.png
+
+CHECKLIST RÁPIDO DE SEGURANÇA DE PATHS
+--------------------------------------
+- Não renomear pastas base: app, components, data, public, lib
+- Em assets públicos usar sempre paths absolutos iniciando por '/'
+  Ex: /podcasts/images/podcast-1-launch.png
+- Ao mover ficheiros, procurar referências antes:
+  - pages/components/data
+  - docs e scripts
+
+ORDEM RECOMENDADA DE LEITURA (DOCS)
+-----------------------------------
+1) docs/README.md
+2) docs/02-STATUS-ATUAL/README.md
+3) docs/04-TECNICO/README.md
+4) docs/06-CONFIGURACAO/README.md
+
+================================================================================
+FIM DO GUIA
+================================================================================

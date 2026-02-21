@@ -1,0 +1,138 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    📚 MAPA DE DOCUMENTAÇÃO - WHAT TO DO                      ║
+║                          19 de Fevereiro de 2026                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─ ESTRUTURA ORGANIZADA ─────────────────────────────────────────────────────┐
+│                                                                              │
+│  docs/                                                                       │
+│  ├── README.md                        ← COMECE AQUI (Índice completo)        │
+│  │                                                                            │
+│  ├── 01-COMEAR-AQUI/                  [🚀 GUIAS DE INICIAÇÃO]               │
+│  │   ├── README.md                    - Navegação da pasta                   │
+│  │   └── 00-GUIA_INICIO.txt           - Instruções essenciais                │
+│  │                                                                            │
+│  ├── 02-STATUS-ATUAL/                 [📊 ESTADO ATUAL DO PROJETO]          │
+│  │   ├── README.md                    - Navegação da pasta                   │
+│  │   ├── CHECKUP_SUMMARY_...txt       - Resumo executivo (19 Fev)            │
+│  │   └── STATUS_DASHBOARD_...txt      - Dashboard snapshot                   │
+│  │                                                                            │
+│  ├── 03-RELATORIOS/                   [📄 RELATÓRIOS & AUDITORIAS]          │
+│  │   ├── README.md                    - Navegação da pasta                   │
+│  │   ├── FINAL_REPORT.md              - Relatório final técnico ★            │
+│  │   ├── FINAL_CHECKUP_...md          - Checkpoint técnico completo          │
+│  │   ├── AUDIT_REPORT.md              - Auditoria técnica abrangente         │
+│  │   └── AUDIT_EXECUTION_...md        - Detalhe de execução                  │
+│  │                                                                            │
+│  ├── 04-TECNICO/                      [🔧 DESENVOLVIMENTO & TÉCNICO]         │
+│  │   ├── README.md                    - Navegação da pasta                   │
+│  │   ├── IMPLEMENTATION_STATUS.md     - Status de implementação              │
+│  │   ├── CONTINUATION_NOTES.md        - Notas de continuação ★               │
+│  │   └── TODO.md                      - Backlog de tarefas                   │
+│  │                                                                            │
+│  ├── 05-OPERACIONAL/                  [🏢 GESTÃO & OPERAÇÕES]                │
+│  │   ├── README.md                    - Navegação da pasta                   │
+│  │   ├── PARTNERS_DASHBOARD_GUIDE.md  - Guia do dashboard partners           │
+│  │   └── PARTNERS_DASHBOARD_GUIDE.pdf - Versão em PDF (print-ready)          │
+│  │                                                                            │
+│  └── 06-CONFIGURACAO/                 [⚙️  SETUP & VARIÁVEIS DE AMBIENTE]   │
+│      ├── README.md                    - Navegação da pasta                   │
+│      └── db_url.txt                   - Strings de conexão PostgreSQL        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ GUIA RÁPIDO POR CENÁRIO ──────────────────────────────────────────────────┐
+│                                                                              │
+│  🆕 SOU NOVO NO PROJETO?                                                     │
+│  └─→ Leia: docs/README.md                                                    │
+│      └─→ Depois: docs/01-COMEAR-AQUI/00-GUIA_INICIO.txt                      │
+│          └─→ E: docs/03-RELATORIOS/FINAL_REPORT.md                           │
+│                                                                               │
+│  📊 QUAL É O ESTADO ATUAL?                                                   │
+│  └─→ Consulte: docs/02-STATUS-ATUAL/CHECKUP_SUMMARY_2026-02-19.txt           │
+│      └─→ Mais detalhe: docs/02-STATUS-ATUAL/STATUS_DASHBOARD_2026-02-19.txt  │
+│                                                                               │
+│  🔧 PRECISO DE DETALHE TÉCNICO                                               │
+│  └─→ Visite: docs/04-TECNICO/README.md                                       │
+│      └─→ Se estou retomando trabalho:                                        │
+│          docs/04-TECNICO/CONTINUATION_NOTES.md                               │
+│          docs/04-TECNICO/IMPLEMENTATION_STATUS.md                            │
+│                                                                               │
+│  📋 DASHBOARD DE PARTNERS?                                                   │
+│  └─→ Leia: docs/05-OPERACIONAL/PARTNERS_DASHBOARD_GUIDE.md                   │
+│      └─→ Para apresentar a partners: PDF version                             │
+│                                                                               │
+│  ⚙️  COMO CONFIGURAR O PROJETO?                                              │
+│  └─→ Consulte: docs/06-CONFIGURACAO/README.md                               │
+│      └─→ URLs de DB: docs/06-CONFIGURACAO/db_url.txt                         │
+│                                                                               │
+│  🔍 AUDITORIA / COMPLIANCE                                                   │
+│  └─→ Veja: docs/03-RELATORIOS/AUDIT_REPORT.md                               │
+│      └─→ Prova de execução:                                                  │
+│          docs/03-RELATORIOS/AUDIT_EXECUTION_2026-02-18.md                    │
+│                                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ FICHEIROS COM ★ (PRIORIDADE ALTA) ────────────────────────────────────────┐
+│                                                                              │
+│  Se tiver pouco tempo, leia ESTES ficheiros:                                │
+│                                                                              │
+│  1. docs/README.md                    [Main index - 2 minutos]              │
+│  2. docs/03-RELATORIOS/FINAL_REPORT.md              [15 minutos]            │
+│  3. docs/04-TECNICO/CONTINUATION_NOTES.md           [10 minutos]            │
+│  4. docs/02-STATUS-ATUAL/CHECKUP_SUMMARY_...txt    [5 minutos]             │
+│                                                                              │
+│  Total: ~32 minutos para entender tudo                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ ORDEM DE LEITURA RECOMENDADA ─────────────────────────────────────────────┐
+│                                                                              │
+│  NÍVEL 1 - Essencial (Comece aqui)                                          │
+│  ─────────────────────────────────────                                      │
+│  1. docs/README.md                              [Overview - 2 min]           │
+│  2. docs/01-COMEAR-AQUI/00-GUIA_INICIO.txt     [Setup - 5 min]              │
+│  3. docs/02-STATUS-ATUAL/CHECKUP_SUMMARY*      [Status - 3 min]             │
+│                                                      ├─ Tempo total: 10 min │
+│                                                                              │
+│  NÍVEL 2 - Técnico (Se é developer)                                         │
+│  ────────────────────────────────────                                       │
+│  4. docs/04-TECNICO/CONTINUATION_NOTES.md      [Contexto - 10 min]          │
+│  5. docs/04-TECNICO/IMPLEMENTATION_STATUS.md   [Funcionalidades - 10 min]   │
+│  6. docs/03-RELATORIOS/FINAL_REPORT.md         [Validação - 15 min]         │
+│                                                      ├─ Tempo extra: 35 min │
+│                                                                              │
+│  NÍVEL 3 - Auditoria (Se é gestor/auditor)                                  │
+│  ───────────────────────────────────────────                                │
+│  7. docs/03-RELATORIOS/AUDIT_REPORT.md         [Auditoria - 20 min]         │
+│  8. docs/03-RELATORIOS/AUDIT_EXECUTION*.md     [Prova - 30 min]             │
+│                                                      ├─ Tempo extra: 50 min │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ STATUS RESUMIDO ──────────────────────────────────────────────────────────┐
+│                                                                             │
+│  ✅ Build TypeScript          Limpo (0 errors)                             │
+│  ✅ Compilação Next.js        Sucesso                                      │
+│  ✅ Health Suite              5/5 checks green                             │
+│  ✅ Qualidade de Dados        684 eventos, 100% categorizado               │
+│  ✅ Segurança                 BOM (HTTP Basic Auth, CSP headers)           │
+│  🟡 Performance               OK (otimizações possíveis)                   │
+│  ⚙️  Base de Dados            PostgreSQL-first (com fallback file)         │
+│                                                                             │
+│  SCORE GLOBAL: 82/100 🟢 VERDE - PRONTO PARA PRODUÇÃO                      │
+│  DATA: 19 de Fevereiro de 2026                                              │
+│                                                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+📌 DICAS FINAIS:
+
+  • Cada pasta tem seu próprio README.md para navegação rápida
+  • Use Ctrl+F para procurar palavras-chave dentro dos ficheiros .md
+  • Os ficheiros estão em Português Europeu (pt-PT)
+  • Nomes de ficheiros descrevem o conteúdo de forma explícita
+  • Data 2026-02-19 indica a última validação completa
+
+═════════════════════════════════════════════════════════════════════════════════
+                    Para mais informações, abra: docs/README.md
+═════════════════════════════════════════════════════════════════════════════════

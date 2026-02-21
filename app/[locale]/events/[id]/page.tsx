@@ -8,22 +8,18 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 import { notFound } from "next/navigation";
-import fs from "fs/promises";
-import path from "path";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
 import FavoriteEventButton from "@/components/FavoriteEventButton";
 import { getDisplayLocation, getDisplayPrice } from "@/lib/event-display";
 import type { Metadata } from "next";
 import type { Event } from "@/data/types";
+import { getEventByIdCached } from "@/lib/server/events-store";
 
 export const revalidate = 3600;
 
 async function getEvent(id: string): Promise<Event | null> {
   try {
-    const filePath = path.join(process.cwd(), "data", "events.json");
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    const events: Event[] = JSON.parse(fileContent);
-    return events.find((e) => e.id === id) ?? null;
+    return await getEventByIdCached(id);
   } catch {
     return null;
   }
@@ -40,15 +36,26 @@ export async function generateMetadata({
     : defaultLocale;
   const event = await getEvent(id);
   if (!event) return {};
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://what-to-do.vercel.app";
+  const defaultOgImage = `${siteUrl}/podcasts/images/podcast-banner.png`;
+  const ogImage = event.image || defaultOgImage;
   return {
     title: `${event.title} — What To Do Lisboa`,
-    description: event.description?.slice(0, 160) || `${event.title} em ${event.location}`,
+    description:
+      event.description?.slice(0, 160) || `${event.title} em ${event.location}`,
     openGraph: {
       title: event.title,
       description: event.description?.slice(0, 160),
-      images: event.image ? [{ url: event.image }] : [],
+      images: [{ url: ogImage }],
       type: "website",
       locale: locale === "pt" ? "pt_PT" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description: event.description?.slice(0, 160),
+      images: [ogImage],
     },
   };
 }
@@ -97,8 +104,51 @@ export default async function EventPage({
     ? `/api/outbound?target=${encodeURIComponent(event.url)}&eventId=${encodeURIComponent(event.id)}&source=${encodeURIComponent(event.source || "unknown")}&locale=${encodeURIComponent(locale)}`
     : null;
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://what-to-do.vercel.app";
+
+  const eventJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description?.slice(0, 300),
+    startDate: event.date,
+    ...(event.endDate ? { endDate: event.endDate } : {}),
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    location: {
+      "@type": "Place",
+      name: normalizedLocation,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Lisboa",
+        addressCountry: "PT",
+      },
+    },
+    ...(event.image ? { image: [event.image] } : {}),
+    ...(event.url
+      ? {
+          offers: {
+            "@type": "Offer",
+            url: event.url,
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : {}),
+    organizer: {
+      "@type": "Organization",
+      name: event.source || "What To Do",
+      url: siteUrl,
+    },
+  };
+
   return (
     <div className="min-h-screen bg-brand-black pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
       <div className="relative h-[50vh] w-full bg-brand-grey-dark overflow-hidden">
         {event.image ? (
           <Image
@@ -107,6 +157,9 @@ export default async function EventPage({
             fill
             className="object-cover opacity-60"
             sizes="100vw"
+            priority
+            fetchPriority="high"
+            quality={75}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-brand-grey text-6xl opacity-20">
@@ -116,12 +169,25 @@ export default async function EventPage({
         <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent" />
 
         <div className="absolute top-6 left-6 z-10">
-          <Link
-            href={`/${locale}/events`}
-            className="flex items-center gap-2 bg-brand-black/50 backdrop-blur px-4 py-2 rounded-full text-white hover:bg-brand-red transition-colors"
-          >
-            <FaArrowLeft /> {isPt ? "Voltar" : "Back"}
-          </Link>
+          <nav className="flex items-center gap-2 bg-brand-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
+            <Link
+              href={`/${locale}`}
+              className="text-brand-grey hover:text-brand-red transition-colors"
+            >
+              {isPt ? "Início" : "Home"}
+            </Link>
+            <span className="text-brand-grey-dark">/</span>
+            <Link
+              href={`/${locale}/events`}
+              className="text-brand-grey hover:text-brand-red transition-colors"
+            >
+              {isPt ? "Eventos" : "Events"}
+            </Link>
+            <span className="text-brand-grey-dark">/</span>
+            <span className="text-white truncate max-w-[120px]">
+              {event.title}
+            </span>
+          </nav>
         </div>
       </div>
 

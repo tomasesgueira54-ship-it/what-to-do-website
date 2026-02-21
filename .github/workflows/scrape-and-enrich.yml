@@ -1,46 +1,43 @@
 name: Scrape & Enrich Events
 
 on:
-    schedule:
-        - cron: "0 2 * * *" # daily at 02:00 UTC
-    workflow_dispatch: {}
-    push:
-        branches:
-            - main
+  schedule:
+    - cron: "0 2 * * *" # daily at 02:00 UTC
+  workflow_dispatch: {}
 
 jobs:
-    scrape-enrich:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  persist-credentials: true
+  scrape-enrich:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-            - name: Use Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "18"
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Fetch events
-              run: npm run fetch:events
+      - name: Fetch events
+        run: npm run fetch:events
 
-            - name: Enrich events
-              run: npm run enrich:events
+      - name: Enrich events
+        run: npm run enrich:events
 
-            - name: Commit updated data
-              run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git add data/events.json || true
-                  if ! git diff --staged --quiet; then
-                    git commit -m "chore(data): update events.json [skip ci]" || true
-                    git push
-                  else
-                    echo "No changes to commit"
-                  fi
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/events.json || true
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): update events.json [skip ci]" || true
+            git push
+          else
+            echo "No changes to commit"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

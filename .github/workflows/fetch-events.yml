@@ -1,36 +1,73 @@
 name: Fetch events (scheduled)
 
 on:
-    schedule:
-        - cron: "0 6 * * *" # daily at 06:00 UTC
-    workflow_dispatch: {}
+  schedule:
+    # 06:00 UTC = 07:00 Lisboa (WET) / 08:00 (WEST, verão)
+    - cron: "0 6 * * *"
+  # Permite trigger manual a partir do separador GitHub Actions
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [refresh-events]
 
 jobs:
-    fetch:
-        runs-on: ubuntu-latest
+  fetch:
+    name: Fetch & update events.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
+    permissions:
+      contents: write
 
-            - name: Use Node.js 20
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install Playwright browsers
-              run: npx playwright install --with-deps
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Run fetch-events script
-              run: npx tsx scripts/fetch-events.ts
+      - name: Install Playwright Chromium only
+        run: npx playwright install chromium --with-deps
 
-            - name: Commit updated events.json
-              run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git add data/events.json || true
-                  git commit -m "chore: update fetched events" || echo "no changes to commit"
-                  git push || echo "push failed"
+      - name: Run fetch-events script
+        run: npm run fetch:events
+        env:
+          NODE_ENV: production
+
+      - name: Validate output
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('data/events.json', 'utf8'));
+            if (!Array.isArray(data) || data.length === 0) {
+              console.error('ERRO: events.json está vazio ou inválido!');
+              process.exit(1);
+            }
+            const bySource = data.reduce((acc, e) => {
+              acc[e.source] = (acc[e.source] || 0) + 1; return acc;
+            }, {});
+            console.log('OK:', data.length, 'eventos');
+            console.log('Por fonte:', JSON.stringify(bySource, null, 2));
+          "
+
+      - name: Commit updated events.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/events.json
+
+          if git diff --staged --quiet; then
+            echo "Sem alterações em events.json — sem commit."
+          else
+            COUNT=$(node -e "const d=require('./data/events.json');console.log(d.length)")
+            git commit -m "chore(events): refresh data — ${COUNT} eventos [skip ci]"
+            git push
+            echo "Push efectuado: ${COUNT} eventos."
+          fi

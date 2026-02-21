@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaPlay, FaPause, FaClock } from "react-icons/fa";
+import { FaPlay, FaPause, FaClock, FaHeadphones } from "react-icons/fa";
 import { useAudio } from "@/context/AudioContext";
+import { useState } from "react";
 
 interface EpisodeCardProps {
   locale?: "pt" | "en";
@@ -23,6 +24,7 @@ export default function EpisodeCard({
   locale = "pt",
 }: EpisodeCardProps) {
   const { playEpisode, currentEpisode, isPlaying, togglePlay } = useAudio();
+  const [imageLoadError, setImageLoadError] = useState(false);
   const labels = {
     nowPlaying: locale === "pt" ? "A TOCAR AGORA..." : "PLAYING NOW...",
     paused: locale === "pt" ? "PAUSADO" : "PAUSED",
@@ -45,7 +47,7 @@ export default function EpisodeCard({
 
   const isCurrent = currentEpisode?.id === episode.id;
   const isActuallyPlaying = isCurrent && isPlaying;
-  const imageSrc = episode.imageUrl || "/images/placeholder-card.svg";
+  const hasImage = episode.imageUrl && !imageLoadError;
 
   const handlePlay = (e: React.MouseEvent) => {
     if (!hasPlayableAudio) return;
@@ -57,18 +59,28 @@ export default function EpisodeCard({
     }
   };
 
+  const handleImageError = () => {
+    setImageLoadError(true);
+  };
+
   return (
     <div className="card group cursor-pointer relative">
       <Link href={`/${locale}/episodes/${episode.id}`} className="block">
-        <div className="relative h-48 overflow-hidden">
-          {imageSrc && (
+        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-brand-red/30 to-brand-red/10">
+          {hasImage && episode.imageUrl && (
             <Image
-              src={imageSrc}
+              src={episode.imageUrl}
               alt={episode.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={handleImageError}
             />
+          )}
+          {!hasImage && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-red/40 to-brand-red/20">
+              <FaHeadphones className="text-6xl text-white/40" />
+            </div>
           )}
           <div className="absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all" />
           <div className="gradient-overlay" />

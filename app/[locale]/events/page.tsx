@@ -1,48 +1,17 @@
-import fs from "fs/promises";
-import path from "path";
 import EventsClient from "@/app/events/EventsClient";
 import { Event } from "@/data/types";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
 import { getTranslations } from "@/lib/use-translations";
+import { getUpcomingEventsCached } from "@/lib/server/events-store";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 async function getEvents(): Promise<Event[]> {
   try {
-    const filePath = path.join(process.cwd(), "data", "events.json");
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    const events: Event[] = JSON.parse(fileContent);
-    return dedupeEvents(events)
-      .filter(isUpcoming)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return await getUpcomingEventsCached();
   } catch {
     return [];
   }
-}
-
-function isUpcoming(event: Event): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const endOrStart = event.endDate
-    ? new Date(event.endDate)
-    : new Date(event.date);
-  return endOrStart >= today;
-}
-
-function dedupeEvents(events: Event[]): Event[] {
-  const seen = new Set<string>();
-  const result: Event[] = [];
-
-  for (const ev of events) {
-    const key = ev.url || "" || `${ev.title}-${ev.date}`;
-    const altKey = `${ev.title}-${ev.date}`;
-    if (seen.has(key) || seen.has(altKey)) continue;
-    seen.add(key);
-    seen.add(altKey);
-    result.push(ev);
-  }
-
-  return result;
 }
 
 export default async function EventsPage({
@@ -69,7 +38,10 @@ export default async function EventsPage({
             {t.events?.title || (locale === "pt" ? "Eventos" : "Events")}
           </h1>
           <p className="text-brand-grey">
-            {t.events?.subtitle || (locale === "pt" ? "Descobre os melhores eventos em Lisboa" : "Discover the best events in Lisbon")}
+            {t.events?.subtitle ||
+              (locale === "pt"
+                ? "Descobre os melhores eventos em Lisboa"
+                : "Discover the best events in Lisbon")}
           </p>
         </div>
         <EventsClient

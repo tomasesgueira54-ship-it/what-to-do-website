@@ -41,6 +41,7 @@ export function safeDate(raw?: string): string {
     return isNaN(d.getTime()) ? '' : d.toISOString();
 }
 
+
 export function extractPriceFromHtml(html: string): string {
     if (!html) return '';
     const lower = html.toLowerCase();
@@ -76,7 +77,75 @@ export function extractPriceFromHtml(html: string): string {
         }
     }
 
-    return '';
+    return 'Check site';
+}
+
+/**
+ * Heuristic to infer end date from description text if missing.
+ * Supports Portuguese ranges like "10 a 12 de Março", "10-12 Mar", etc.
+ */
+export function inferEndDateFromText(text: string, startDate: Date): Date | undefined {
+    if (!text || !startDate) return undefined;
+
+    const lower = text.toLowerCase();
+    const currentYear = startDate.getFullYear();
+    const months = [
+        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+        'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'
+    ];
+
+    // Pattern: "10 a 12 de Março" or "10 - 12 Mar"
+    // We look for a date pattern occurring AFTER the start date mentions, or just general ranges.
+    // Simplification: verify if there is a date string that looks like an end date.
+
+    // Regex for "day 'a' day 'de' month"
+    const rangeMatch = lower.match(/(\d{1,2})\s*(?:a|-)\s*(\d{1,2})\s*(?:de\s*)?([a-zç]{3,})/);
+    if (rangeMatch) {
+        const [, startDayStr, endDayStr, monthStr] = rangeMatch;
+        const monthIndex = months.findIndex(m => monthStr.startsWith(m));
+
+        if (monthIndex !== -1) {
+            // Check if this range matches our start date
+            const startDay = parseInt(startDayStr, 10);
+            if (startDay === startDate.getDate() && monthIndex === startDate.getMonth()) {
+                const endDay = parseInt(endDayStr, 10);
+                // Create end date
+                const endDate = new Date(startDate);
+                endDate.setMonth(monthIndex);
+                endDate.setDate(endDay);
+                // Set end of day
+                endDate.setHours(23, 59, 59, 999);
+                return endDate;
+            }
+        }
+    }
+
+    return undefined;
+}
+
+export function applyDefaultDuration(event: Event, defaultHours: number = 2): void {
+    if (event.date && !event.endDate) {
+        const start = new Date(event.date);
+        // Heuristic: If title/description contains 'Exposição', default to much longer or handle differently?
+        // For now, just add hours.
+        const keywords = (event.title + ' ' + event.description).toLowerCase();
+
+        let additionalHours = defaultHours;
+
+        // Nightlife/Clubbing often goes past midnight
+        if (event.source === 'Shotgun' || event.source === 'Xceed' || keywords.includes('party') || keywords.includes('club') || keywords.includes('dj set')) {
+            additionalHours = 6;
+        } else if (keywords.includes('exposição') || keywords.includes('exhibition')) {
+            // update: exhibitions usually run for days/weeks. 
+            // If we only have start date, it might be the opening.
+            // Without explicit end date, assumes same day closing time?
+            additionalHours = 2; // Opening event duration
+        }
+
+        const end = new Date(start.getTime() + additionalHours * 60 * 60 * 1000);
+        event.endDate = end.toISOString();
+    }
 }
 
 // Lightweight category detection used by scrapers (conservative rules)
@@ -250,7 +319,7 @@ export function makeEvent(p: {
 
     const rawText = `${title} ${description} ${location}`;
     const inferredCategory =
-        detectCategoryBySource({ source: p.source, text: rawText, url: p.url }) || detectCategoryFromText(rawText);
+        detectCategoryBySource({ source: p.source, text: rawText, url: p.url }) || detectCategoryFromText(rawText) || 'Outro';
     const canInferMusicGenre = inferredCategory === 'Música' || inferredCategory === 'Discoteca/Nightlife';
     const inferredGenre =
         canInferMusicGenre
@@ -264,7 +333,7 @@ export function makeEvent(p: {
         date: safeDate(p.date),
         endDate: safeDate(p.endDate),
         location,
-        image: p.image && p.image.startsWith('http') ? p.image : '/placeholder-event.jpg',
+        image: p.image && p.image.startsWith('http') ? p.image : '/images/placeholder-card.svg',
         source: p.source,
         url: p.url,
         price: p.price,

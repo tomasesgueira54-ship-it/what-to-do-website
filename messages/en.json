@@ -7,6 +7,7 @@
     "podcast": "Podcast",
     "blog": "Guides",
     "about": "About",
+    "contact": "Contact",
     "subscribe": "Subscribe",
     "toggle_menu": "Toggle menu"
   },
@@ -34,7 +35,7 @@
     "title": "Cultural Agenda",
     "subtitle": "The best events, concerts, exhibitions and parties in Lisbon for this week.",
     "total": "Total events",
-    "search_placeholder": "Search events (Coming soon)",
+    "search_placeholder": "Search events...",
     "price_unavailable": "Price unavailable",
     "today": "Today",
     "tomorrow": "Tomorrow",
@@ -57,7 +58,12 @@
     "clear_filters": "Try clearing filters",
     "favorites_only": "Favorites only",
     "source": "Source",
-    "loading_map": "Loading map..."
+    "loading_map": "Loading map...",
+    "open_filters": "Open filters",
+    "close_filters": "Close filters",
+    "active_filters": "Active filters",
+    "remove_filter": "Remove filter",
+    "duration": "Duration"
   },
   "blog": {
     "title": "Guides & Itineraries",
@@ -96,6 +102,7 @@
     "blog": "Guides",
     "about": "About",
     "partners": "Partners",
+    "contact": "Contact",
     "newsletter": "Newsletter",
     "newsletter_description": "Receive new episodes and articles directly in your email.",
     "copyright": "All rights reserved.",
@@ -117,6 +124,16 @@
     "success": "Success",
     "try_again": "Try again",
     "close": "Close"
+  },
+  "player": {
+    "close": "Close player",
+    "rewind_15": "Rewind 15s",
+    "rewind_15_seconds": "Rewind 15 seconds",
+    "play_playback": "Play playback",
+    "pause_playback": "Pause playback",
+    "forward_15": "Forward 15s",
+    "forward_15_seconds": "Forward 15 seconds",
+    "seek_timeline": "Seek audio timeline"
   },
   "favorites": {
     "add": "Add to favorites",
@@ -207,5 +224,32 @@
       "locked_title": "Protected dashboard",
       "locked_text": "Provide the correct token in the URL to access the dashboard."
     }
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Create Account",
+    "logout": "Sign Out",
+    "my_account": "My Account",
+    "google_continue": "Continue with Google",
+    "or": "or",
+    "name_label": "Full name",
+    "email_label": "Email",
+    "password_label": "Password",
+    "name_placeholder": "Your name",
+    "password_placeholder": "Minimum 8 characters",
+    "creating": "Creating account...",
+    "signing_in": "Signing in...",
+    "signing_out": "Signing out...",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?",
+    "back_home": "Back to home",
+    "join_community": "Join the What To Do Lisbon community",
+    "access_account": "Access your What To Do account",
+    "manage_profile": "Manage your profile and preferences",
+    "member_since": "Member since",
+    "google_account": "Google Account",
+    "email_password": "Email and password",
+    "connection_error": "Connection error. Please try again.",
+    "google_error": "Error connecting with Google. Please try again."
   }
 }

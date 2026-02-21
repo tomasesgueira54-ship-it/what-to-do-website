@@ -5,7 +5,7 @@ import { Event } from '../types';
 import { DEFAULT_UA, makeEvent, titleFromSlug, dismissCookies, toAbsolute, cleanText, safeDate, extractPriceFromHtml } from './utils';
 
 const BASE = 'https://www.bol.pt';
-const BOL_FALLBACK_IMAGE = '/placeholder-event.jpg';
+const BOL_FALLBACK_IMAGE = '/images/placeholder-card.svg';
 
 function isBOLJunk(url: string, title: string): boolean {
     const u = url.toLowerCase();

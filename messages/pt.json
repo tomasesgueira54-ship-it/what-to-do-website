@@ -7,6 +7,7 @@
     "podcast": "Podcast",
     "blog": "Guias",
     "about": "Sobre",
+    "contact": "Contacto",
     "subscribe": "Subscrever",
     "toggle_menu": "Alternar menu"
   },
@@ -34,7 +35,7 @@
     "title": "Agenda Cultural",
     "subtitle": "Os melhores eventos, concertos, exposições e festas em Lisboa para esta semana.",
     "total": "Total de eventos",
-    "search_placeholder": "Pesquisar eventos (Em breve)",
+    "search_placeholder": "Pesquisar eventos...",
     "price_unavailable": "Preço indisponível",
     "today": "Hoje",
     "tomorrow": "Amanhã",
@@ -48,7 +49,7 @@
     "search": "Pesquisar...",
     "clear_search": "Limpar pesquisa",
     "minimum_date": "Data mínima",
-    "free_only": "Só gratúitos",
+    "free_only": "Só gratuitos",
     "sort_label": "Ordenar",
     "sort_soonest": "Mais próximos",
     "sort_latest": "Mais distantes",
@@ -57,7 +58,12 @@
     "clear_filters": "Tentar remover filtros",
     "favorites_only": "Só favoritos",
     "source": "Fonte",
-    "loading_map": "Carregando mapa..."
+    "loading_map": "Carregando mapa...",
+    "open_filters": "Abrir filtros",
+    "close_filters": "Fechar filtros",
+    "active_filters": "Filtros ativos",
+    "remove_filter": "Remover filtro",
+    "duration": "Duração"
   },
   "blog": {
     "title": "Guias e Roteiros",
@@ -70,7 +76,7 @@
     "sections": {
       "agenda": {
         "title": "Agenda Semanal",
-        "description": "Curaçadoria semanal dos melhores concertos, exposições, teatro e festas que acontecem em Lisboa."
+        "description": "Curadoria semanal dos melhores concertos, exposições, teatro e festas que acontecem em Lisboa."
       },
       "podcast": {
         "title": "Podcast",
@@ -96,15 +102,16 @@
     "blog": "Guias",
     "about": "Sobre",
     "partners": "Parcerias",
+    "contact": "Contacto",
     "newsletter": "Newsletter",
-    "newsletter_description": "Receba novos episódios e artigos diretamente no seu email.",
+    "newsletter_description": "Recebe novos episódios e artigos diretamente no teu email.",
     "copyright": "Todos os direitos reservados.",
     "privacy": "Privacidade",
     "terms": "Termos"
   },
   "subscribe": {
-    "name_placeholder": "Seu nome...",
-    "placeholder": "Seu email...",
+    "name_placeholder": "O teu nome...",
+    "placeholder": "O teu email...",
     "consent_label": "Concordo em receber comunicações por email.",
     "button": "Subscrever",
     "success": "Obrigado! Verifica o teu email.",
@@ -117,6 +124,16 @@
     "success": "Sucesso",
     "try_again": "Tenta novamente",
     "close": "Fechar"
+  },
+  "player": {
+    "close": "Fechar leitor",
+    "rewind_15": "Recuar 15s",
+    "rewind_15_seconds": "Recuar 15 segundos",
+    "play_playback": "Reproduzir",
+    "pause_playback": "Pausar",
+    "forward_15": "Avançar 15s",
+    "forward_15_seconds": "Avançar 15 segundos",
+    "seek_timeline": "Percorrer linha temporal do áudio"
   },
   "favorites": {
     "add": "Adicionar aos favoritos",
@@ -207,5 +224,32 @@
       "locked_title": "Dashboard protegido",
       "locked_text": "Fornece o token correto no URL para aceder ao dashboard."
     }
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Criar Conta",
+    "logout": "Terminar Sessão",
+    "my_account": "Minha Conta",
+    "google_continue": "Continuar com Google",
+    "or": "ou",
+    "name_label": "Nome completo",
+    "email_label": "Email",
+    "password_label": "Password",
+    "name_placeholder": "O teu nome",
+    "password_placeholder": "Mínimo 8 caracteres",
+    "creating": "A criar conta...",
+    "signing_in": "A entrar...",
+    "signing_out": "A sair...",
+    "no_account": "Não tens conta?",
+    "has_account": "Já tens conta?",
+    "back_home": "Voltar ao início",
+    "join_community": "Junta-te à comunidade What To Do Lisboa",
+    "access_account": "Acede à tua conta What To Do",
+    "manage_profile": "Gere o teu perfil e preferências",
+    "member_since": "Membro desde",
+    "google_account": "Conta Google",
+    "email_password": "Email e password",
+    "connection_error": "Erro de ligação. Tenta novamente.",
+    "google_error": "Erro ao ligar com o Google. Tenta novamente."
   }
 }

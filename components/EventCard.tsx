@@ -66,6 +66,35 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
         })
       : null;
 
+  const durationLabel = (() => {
+    if (!endDate) return null;
+    const durationMs = endDate.getTime() - eventDate.getTime();
+    if (durationMs <= 0) return null;
+
+    const totalMinutes = Math.round(durationMs / 60000);
+    if (totalMinutes < 60) {
+      return locale === "pt" ? `${totalMinutes} min` : `${totalMinutes} min`;
+    }
+
+    if (totalMinutes < 24 * 60) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (minutes === 0) return `${hours}h`;
+      return `${hours}h ${minutes}min`;
+    }
+
+    const totalHours = Math.round(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
+    if (remainingHours === 0) {
+      return locale === "pt" ? `${days} dia(s)` : `${days} day(s)`;
+    }
+
+    return locale === "pt"
+      ? `${days} dia(s) ${remainingHours}h`
+      : `${days} day(s) ${remainingHours}h`;
+  })();
+
   const rawPrice = getDisplayPrice(
     event.price,
     event.description,
@@ -216,6 +245,11 @@ export default function EventCard({ event, locale = "pt" }: EventCardProps) {
                     })}
                   </span>
                 )}
+              {durationLabel && (
+                <span className="text-[10px] text-brand-grey mt-0.5">
+                  {t("events.duration", "Duration")}: {durationLabel}
+                </span>
+              )}
             </div>
           </div>
 

@@ -5,6 +5,7 @@ import {
   FaYoutube,
   FaInstagram,
   FaTwitter,
+  FaEnvelope,
 } from "react-icons/fa";
 import { useTranslations } from "@/lib/use-translations";
 import SubscribeForm from "./SubscribeForm";
@@ -28,7 +29,9 @@ export default function Footer({ locale = "pt" }: FooterProps) {
     },
     {
       name: "YouTube",
-      url: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE || "https://youtube.com/@whattodo",
+      url:
+        process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE ||
+        "https://youtube.com/@whattodo",
       Icon: FaYoutube,
     },
     {
@@ -60,6 +63,17 @@ export default function Footer({ locale = "pt" }: FooterProps) {
                 "Descubra o que fazer através do nosso podcast e blog. Histórias inspiradoras, dicas práticas e entretenimento de qualidade.",
               )}
             </p>
+            <div className="mt-4 mb-4">
+              <a
+                href="mailto:whattodoofficialmail@gmail.com"
+                aria-label="Email: whattodoofficialmail@gmail.com"
+                className="text-brand-grey hover:text-brand-red transition-colors text-sm inline-flex items-center gap-2"
+              >
+                <FaEnvelope className="text-brand-red" aria-hidden="true" />
+                whattodoofficialmail@gmail.com
+              </a>
+            </div>
+
             {socialLinks.length > 0 && (
               <div className="flex space-x-4">
                 {socialLinks.map(({ name, url, Icon }) => (
@@ -68,11 +82,15 @@ export default function Footer({ locale = "pt" }: FooterProps) {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={name}
+                    aria-label={
+                      locale === "pt"
+                        ? `${name} (abre numa nova aba)`
+                        : `${name} (opens in a new tab)`
+                    }
                     title={name}
                     className="text-brand-grey hover:text-brand-red transition-colors"
                   >
-                    <Icon className="text-2xl" />
+                    <Icon className="text-2xl" aria-hidden="true" />
                   </a>
                 ))}
               </div>
@@ -131,6 +149,14 @@ export default function Footer({ locale = "pt" }: FooterProps) {
                   className="text-brand-grey hover:text-brand-red transition-colors"
                 >
                   {t("footer.partners", "Parcerias")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${locale}/contact`}
+                  className="text-brand-grey hover:text-brand-red transition-colors"
+                >
+                  {t("footer.contact", "Contacto")}
                 </Link>
               </li>
             </ul>

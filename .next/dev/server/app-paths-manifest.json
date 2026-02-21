@@ -1,6 +1,11 @@
 {
-  "/[locale]/episodes/[id]/page": "app/[locale]/episodes/[id]/page.js",
+  "/[locale]/about/page": "app/[locale]/about/page.js",
+  "/[locale]/blog/page": "app/[locale]/blog/page.js",
+  "/[locale]/contact/page": "app/[locale]/contact/page.js",
   "/[locale]/episodes/page": "app/[locale]/episodes/page.js",
+  "/[locale]/events/page": "app/[locale]/events/page.js",
+  "/[locale]/my-agenda/page": "app/[locale]/my-agenda/page.js",
   "/[locale]/page": "app/[locale]/page.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/[locale]/partners/page": "app/[locale]/partners/page.js",
+  "/api/analytics/route": "app/api/analytics/route.js"
 }

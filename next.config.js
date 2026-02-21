@@ -23,6 +23,30 @@ const nextConfig = {
     async headers() {
         return [
             {
+                source: '/images/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+                ],
+            },
+            {
+                source: '/audio/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+                ],
+            },
+            {
+                source: '/podcasts/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+                ],
+            },
+            {
+                source: '/video/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+                ],
+            },
+            {
                 source: '/:path*',
                 headers: [
                     { key: 'X-Frame-Options', value: 'DENY' },
@@ -50,8 +74,11 @@ const nextConfig = {
             { protocol: 'https', hostname: 'cdn.evbstatic.com' },
             { protocol: 'https', hostname: 'images.xceed.me' },
             { protocol: 'https', hostname: 'res.cloudinary.com' },
+            { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
         ],
         formats: ['image/avif', 'image/webp'],
+        minimumCacheTTL: 60 * 60 * 24 * 7,
+        dangerouslyAllowSVG: true,
     },
     experimental: {
         optimizeCss: true,

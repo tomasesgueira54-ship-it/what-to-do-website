@@ -24,6 +24,20 @@ type PromoterLeadInput = {
     locale: "pt" | "en";
 };
 
+type FunnelEventType =
+    | "page_view"
+    | "contact_success"
+    | "subscribe_success";
+
+type FunnelEventInput = {
+    eventType: FunnelEventType;
+    locale: string;
+    path: string;
+    referrer: string;
+    userAgent: string;
+    clientIp: string;
+};
+
 type DashboardMetrics = {
     usingPostgres: boolean;
     totals: {
@@ -99,6 +113,20 @@ export type DashboardExportLead = {
     locale: string;
 };
 
+export type DashboardFunnelMetrics = {
+    usingPostgres: boolean;
+    current: {
+        pageViews: number;
+        subscribeSuccess: number;
+        contactSuccess: number;
+    };
+    previous: {
+        pageViews: number;
+        subscribeSuccess: number;
+        contactSuccess: number;
+    };
+};
+
 function sanitizeFilter(value?: string): string | undefined {
     if (!value) return undefined;
     const trimmed = value.trim();
@@ -112,6 +140,11 @@ const outboundClicksMemory: Array<
 > = [];
 
 const promoterLeadsMemory: PromoterLeadInput[] = [];
+const funnelEventsMemory: Array<
+    FunnelEventInput & {
+        createdAt: string;
+    }
+> = [];
 
 let pool: Pool | null = null;
 let schemaEnsured = false;
@@ -170,6 +203,19 @@ async function ensureSchema(): Promise<void> {
       locale TEXT NOT NULL
     );
   `);
+
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS wtd_funnel_events (
+            id BIGSERIAL PRIMARY KEY,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            event_type TEXT NOT NULL,
+            locale TEXT NOT NULL,
+            path TEXT NOT NULL,
+            referrer TEXT NOT NULL,
+            user_agent TEXT NOT NULL,
+            client_ip TEXT NOT NULL
+        );
+    `);
 
     schemaEnsured = true;
 }
@@ -232,6 +278,33 @@ export async function recordPromoterLead(input: PromoterLeadInput): Promise<void
             input.message,
             input.website || null,
             input.locale,
+        ],
+    );
+}
+
+export async function recordFunnelEvent(input: FunnelEventInput): Promise<void> {
+    const createdAt = new Date().toISOString();
+    const db = getPool();
+
+    if (!db) {
+        funnelEventsMemory.push({ ...input, createdAt });
+        return;
+    }
+
+    await ensureSchema();
+    await db.query(
+        `
+      INSERT INTO wtd_funnel_events
+      (event_type, locale, path, referrer, user_agent, client_ip)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `,
+        [
+            input.eventType,
+            input.locale,
+            input.path,
+            input.referrer,
+            input.userAgent,
+            input.clientIp,
         ],
     );
 }
@@ -783,4 +856,81 @@ export async function getExportLeads(days = 30): Promise<DashboardExportLead[]> 
         website: row.website ? String(row.website) : "",
         locale: String(row.locale),
     }));
+}
+
+export async function getDashboardFunnelMetrics(
+    days = 30,
+): Promise<DashboardFunnelMetrics> {
+    const db = getPool();
+
+    if (!db) {
+        const now = Date.now();
+        const threshold = now - days * 24 * 60 * 60 * 1000;
+        const previousThreshold = now - days * 2 * 24 * 60 * 60 * 1000;
+
+        const current = {
+            pageViews: 0,
+            subscribeSuccess: 0,
+            contactSuccess: 0,
+        };
+        const previous = {
+            pageViews: 0,
+            subscribeSuccess: 0,
+            contactSuccess: 0,
+        };
+
+        funnelEventsMemory.forEach((event) => {
+            const createdAtMs = new Date(event.createdAt).getTime();
+            const target =
+                createdAtMs >= threshold
+                    ? current
+                    : createdAtMs >= previousThreshold && createdAtMs < threshold
+                        ? previous
+                        : null;
+
+            if (!target) return;
+
+            if (event.eventType === "page_view") target.pageViews += 1;
+            if (event.eventType === "subscribe_success") target.subscribeSuccess += 1;
+            if (event.eventType === "contact_success") target.contactSuccess += 1;
+        });
+
+        return {
+            usingPostgres: false,
+            current,
+            previous,
+        };
+    }
+
+    await ensureSchema();
+    const result = await db.query(
+        `
+            SELECT
+                SUM(CASE WHEN event_type = 'page_view' AND created_at >= NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "currentPageViews",
+                SUM(CASE WHEN event_type = 'subscribe_success' AND created_at >= NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "currentSubscribeSuccess",
+                SUM(CASE WHEN event_type = 'contact_success' AND created_at >= NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "currentContactSuccess",
+                SUM(CASE WHEN event_type = 'page_view' AND created_at >= NOW() - make_interval(days => ($1::int * 2)) AND created_at < NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "previousPageViews",
+                SUM(CASE WHEN event_type = 'subscribe_success' AND created_at >= NOW() - make_interval(days => ($1::int * 2)) AND created_at < NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "previousSubscribeSuccess",
+                SUM(CASE WHEN event_type = 'contact_success' AND created_at >= NOW() - make_interval(days => ($1::int * 2)) AND created_at < NOW() - make_interval(days => $1::int) THEN 1 ELSE 0 END)::int AS "previousContactSuccess"
+            FROM wtd_funnel_events
+            WHERE created_at >= NOW() - make_interval(days => ($1::int * 2))
+        `,
+        [days],
+    );
+
+    const row = result.rows[0] || {};
+
+    return {
+        usingPostgres: true,
+        current: {
+            pageViews: Number(row.currentPageViews) || 0,
+            subscribeSuccess: Number(row.currentSubscribeSuccess) || 0,
+            contactSuccess: Number(row.currentContactSuccess) || 0,
+        },
+        previous: {
+            pageViews: Number(row.previousPageViews) || 0,
+            subscribeSuccess: Number(row.previousSubscribeSuccess) || 0,
+            contactSuccess: Number(row.previousContactSuccess) || 0,
+        },
+    };
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { defaultLocale, locales, type Locale } from "@/i18n.config";
 import { getTranslations } from "@/lib/use-translations";
 import {
+  getDashboardFunnelMetrics,
   getDashboardFilterOptions,
   getDashboardMetricsWithFilters,
 } from "@/lib/server/analytics-store";
@@ -22,7 +23,6 @@ export default async function PartnersDashboardPage({
 }: {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
-    token?: string;
     days?: string;
     source?: string;
     eventId?: string;
@@ -32,7 +32,6 @@ export default async function PartnersDashboardPage({
 }) {
   const { locale: localeParam } = await params;
   const {
-    token,
     days: daysParam,
     source: sourceParam,
     eventId: eventIdParam,
@@ -44,10 +43,6 @@ export default async function PartnersDashboardPage({
     ? (localeParam as Locale)
     : defaultLocale;
   const t = getT(locale);
-
-  const expectedToken = process.env.PARTNERS_DASHBOARD_TOKEN;
-  const requiresToken = Boolean(expectedToken);
-  const isAuthorized = !requiresToken || token === expectedToken;
   const selectedDays = ["7", "30", "90"].includes(daysParam || "")
     ? Number(daysParam)
     : 30;
@@ -75,7 +70,6 @@ export default async function PartnersDashboardPage({
     if (eventId && eventId.trim()) params.set("eventId", eventId.trim());
     if (sortBy) params.set("sortBy", sortBy);
     if (sortDir) params.set("sortDir", sortDir);
-    if (token) params.set("token", token);
     return `/${locale}/partners/dashboard?${params.toString()}`;
   };
 
@@ -87,7 +81,6 @@ export default async function PartnersDashboardPage({
     if (selectedEventId) params.set("eventId", selectedEventId);
     params.set("sortBy", selectedSortBy);
     params.set("sortDir", selectedSortDir);
-    if (token) params.set("token", token);
     return `/api/partners/export?${params.toString()}`;
   };
 
@@ -99,30 +92,13 @@ export default async function PartnersDashboardPage({
     selectedSortDir,
   );
 
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-screen bg-brand-black py-12">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h1 className="font-display text-3xl font-bold text-white mb-3">
-            {t("partners.dashboard.locked_title", "Dashboard protegido")}
-          </h1>
-          <p className="text-brand-grey">
-            {t(
-              "partners.dashboard.locked_text",
-              "Fornece o token correto no URL para aceder ao dashboard.",
-            )}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const [metrics, filterOptions] = await Promise.all([
+  const [metrics, filterOptions, funnelMetrics] = await Promise.all([
     getDashboardMetricsWithFilters(selectedDays, {
       source: selectedSource || undefined,
       eventId: selectedEventId || undefined,
     }),
     getDashboardFilterOptions(selectedDays),
+    getDashboardFunnelMetrics(selectedDays),
   ]);
 
   const conversionRate =
@@ -169,6 +145,45 @@ export default async function PartnersDashboardPage({
   const conversionTrendLabel = `${
     conversionDelta > 0 ? "+" : ""
   }${conversionDelta.toFixed(1)} pp`;
+  const pageViewsTrend = formatTrend(
+    funnelMetrics.current.pageViews - funnelMetrics.previous.pageViews,
+    funnelMetrics.previous.pageViews > 0
+      ? ((funnelMetrics.current.pageViews - funnelMetrics.previous.pageViews) /
+          funnelMetrics.previous.pageViews) *
+          100
+      : null,
+  );
+  const subscribeTrend = formatTrend(
+    funnelMetrics.current.subscribeSuccess -
+      funnelMetrics.previous.subscribeSuccess,
+    funnelMetrics.previous.subscribeSuccess > 0
+      ? ((funnelMetrics.current.subscribeSuccess -
+          funnelMetrics.previous.subscribeSuccess) /
+          funnelMetrics.previous.subscribeSuccess) *
+          100
+      : null,
+  );
+  const contactTrend = formatTrend(
+    funnelMetrics.current.contactSuccess -
+      funnelMetrics.previous.contactSuccess,
+    funnelMetrics.previous.contactSuccess > 0
+      ? ((funnelMetrics.current.contactSuccess -
+          funnelMetrics.previous.contactSuccess) /
+          funnelMetrics.previous.contactSuccess) *
+          100
+      : null,
+  );
+  const pageToClickRate =
+    funnelMetrics.current.pageViews > 0
+      ? (metrics.totals.clicks / funnelMetrics.current.pageViews) * 100
+      : 0;
+  const clickToLeadRate =
+    metrics.totals.clicks > 0
+      ? ((funnelMetrics.current.subscribeSuccess +
+          funnelMetrics.current.contactSuccess) /
+          metrics.totals.clicks) *
+        100
+      : 0;
   const currentDailyMap = new Map(
     metrics.dailyClicks.map((entry) => [entry.day, entry.clicks]),
   );
@@ -265,6 +280,12 @@ export default async function PartnersDashboardPage({
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href={`/${locale}/partners/dashboard/perf`}
+              className="px-3 py-2 rounded-lg border border-brand-grey-dark text-brand-grey hover:text-white transition-colors text-sm"
+            >
+              {t("partners.dashboard.api_perf", "API Perf")}
+            </Link>
             <a
               href={buildExportHref("leads")}
               className="px-3 py-2 rounded-lg border border-brand-grey-dark text-brand-grey hover:text-white transition-colors text-sm"
@@ -309,7 +330,6 @@ export default async function PartnersDashboardPage({
         </div>
 
         <form className="bg-brand-black-light border border-brand-grey-dark/40 rounded-xl p-4 mb-6">
-          {token ? <input type="hidden" name="token" value={token} /> : null}
           <input type="hidden" name="days" value={String(selectedDays)} />
           <input type="hidden" name="sortBy" value={selectedSortBy} />
           <input type="hidden" name="sortDir" value={selectedSortDir} />
@@ -406,6 +426,91 @@ export default async function PartnersDashboardPage({
             </p>
           </div>
         </div>
+
+        <section className="bg-brand-black-light border border-brand-grey-dark/40 rounded-xl p-5 mb-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+            <h2 className="text-white font-semibold">
+              {t("partners.dashboard.funnel_title", "Funil de aquisição")}
+            </h2>
+            <p className="text-xs text-brand-grey">
+              {funnelMetrics.usingPostgres
+                ? t("partners.dashboard.storage_pg", "PostgreSQL")
+                : t("partners.dashboard.storage_memory", "Memória (fallback)")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/40 p-4">
+              <p className="text-brand-grey text-xs mb-1">
+                {t("partners.dashboard.funnel_pageviews", "Pageviews")}
+              </p>
+              <p className="text-white text-2xl font-bold">
+                {funnelMetrics.current.pageViews}
+              </p>
+              <p className={`text-xs mt-2 ${pageViewsTrend.className}`}>
+                {pageViewsTrend.label}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/40 p-4">
+              <p className="text-brand-grey text-xs mb-1">
+                {t("partners.dashboard.funnel_outbound", "Outbound clicks")}
+              </p>
+              <p className="text-white text-2xl font-bold">
+                {metrics.totals.clicks}
+              </p>
+              <p className={`text-xs mt-2 ${clicksTrend.className}`}>
+                {clicksTrend.label}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/40 p-4">
+              <p className="text-brand-grey text-xs mb-1">
+                {t("partners.dashboard.funnel_subscribe", "Subscribe success")}
+              </p>
+              <p className="text-white text-2xl font-bold">
+                {funnelMetrics.current.subscribeSuccess}
+              </p>
+              <p className={`text-xs mt-2 ${subscribeTrend.className}`}>
+                {subscribeTrend.label}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/40 p-4">
+              <p className="text-brand-grey text-xs mb-1">
+                {t("partners.dashboard.funnel_contact", "Contact success")}
+              </p>
+              <p className="text-white text-2xl font-bold">
+                {funnelMetrics.current.contactSuccess}
+              </p>
+              <p className={`text-xs mt-2 ${contactTrend.className}`}>
+                {contactTrend.label}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/30 px-4 py-3">
+              <p className="text-brand-grey text-xs mb-1">
+                {t(
+                  "partners.dashboard.funnel_rate_page_click",
+                  "Pageview → Click",
+                )}
+              </p>
+              <p className="text-white text-lg font-semibold">
+                {pageToClickRate.toFixed(1)}%
+              </p>
+            </div>
+            <div className="rounded-lg border border-brand-grey-dark/40 bg-brand-black/30 px-4 py-3">
+              <p className="text-brand-grey text-xs mb-1">
+                {t("partners.dashboard.funnel_rate_click_lead", "Click → Lead")}
+              </p>
+              <p className="text-white text-lg font-semibold">
+                {clickToLeadRate.toFixed(1)}%
+              </p>
+            </div>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <section className="bg-brand-black-light border border-brand-grey-dark/40 rounded-xl p-5">

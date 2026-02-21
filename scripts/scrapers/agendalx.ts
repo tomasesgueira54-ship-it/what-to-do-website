@@ -2,10 +2,14 @@ import { chromium } from 'playwright';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import { Event } from '../types';
-import { DEFAULT_UA, makeEvent, titleFromSlug, dismissCookies, cleanText, toAbsolute, safeDate, extractPriceFromHtml } from './utils';
+import { DEFAULT_UA, makeEvent, titleFromSlug, dismissCookies, cleanText, toAbsolute, safeDate, extractPriceFromHtml, inferEndDateFromText, applyDefaultDuration } from './utils';
 
 async function hydrateAgendaDetails(events: Event[]): Promise<void> {
-    const targets = events.filter((e) => !e.description || e.description === 'Ver detalhes' || !e.image || e.image.includes('placeholder'));
+    const targets = events.filter((e) =>
+        !e.description || e.description === 'Ver detalhes'
+        || !e.image || e.image.includes('placeholder')
+        || !e.date || !e.endDate
+    );
     if (targets.length === 0) return;
 
     const concurrency = 6;
@@ -43,12 +47,12 @@ async function hydrateAgendaDetails(events: Event[]): Promise<void> {
                     if (desc) ev.description = cleanText(desc).substring(0, 240);
                 }
 
-                if (!ev.date) {
+                if (!ev.date || !ev.endDate) {
                     const ldWithDate = $('script[type="application/ld+json"]').toArray().find((el) => {
                         try {
                             const data = JSON.parse($(el).html() || '');
                             const arr = Array.isArray(data) ? data : [data];
-                            return arr.some((d: any) => d.startDate);
+                            return arr.some((d: any) => d.startDate || d.endDate);
                         } catch {
                             return false;
                         }
@@ -58,10 +62,14 @@ async function hydrateAgendaDetails(events: Event[]): Promise<void> {
                         try {
                             const data = JSON.parse($(ldWithDate).html() || '');
                             const arr = Array.isArray(data) ? data : [data];
-                            const found = arr.find((d: any) => d.startDate);
-                            if (found?.startDate) {
+                            const found = arr.find((d: any) => d.startDate || d.endDate);
+                            if (found?.startDate && !ev.date) {
                                 const normalized = safeDate(found.startDate);
                                 if (normalized) ev.date = normalized;
+                            }
+                            if (found?.endDate && !ev.endDate) {
+                                const normalizedEnd = safeDate(found.endDate);
+                                if (normalizedEnd) ev.endDate = normalizedEnd;
                             }
                         } catch {
                             /* ignore */
@@ -73,6 +81,13 @@ async function hydrateAgendaDetails(events: Event[]): Promise<void> {
                             $('meta[itemprop="startDate"], meta[property="event:start_time"], meta[name="startDate"]').attr('content') || '';
                         const normalized = safeDate(meta || undefined);
                         if (normalized) ev.date = normalized;
+                    }
+
+                    if (!ev.endDate) {
+                        const metaEnd =
+                            $('meta[itemprop="endDate"], meta[property="event:end_time"], meta[name="endDate"]').attr('content') || '';
+                        const normalizedEnd = safeDate(metaEnd || undefined);
+                        if (normalizedEnd) ev.endDate = normalizedEnd;
                     }
                 }
 
@@ -110,6 +125,19 @@ async function hydrateAgendaDetails(events: Event[]): Promise<void> {
                         $('article img, .post-item img').first().attr('src') ||
                         '';
                     if (ogImg) ev.image = toAbsolute(ogImg, new URL(ev.url).origin);
+                }
+
+                // New Heuristic Phase 2: Infer End Date from text if missing
+                // Run THIS AFTER we have potentially scraped the date above
+                if (ev.date && !ev.endDate) {
+                    const textToScan = (ev.description || '') + ' ' + $('body').text();
+                    const inferred = inferEndDateFromText(textToScan, new Date(ev.date));
+                    if (inferred) {
+                        ev.endDate = inferred.toISOString();
+                    } else {
+                        // Default duration if still missing
+                        applyDefaultDuration(ev, 2);
+                    }
                 }
             } catch {
                 /* swallow */
@@ -216,6 +244,7 @@ export async function scrapeAgendaLX(): Promise<Event[]> {
         const events = cards.map((c: any) =>
             makeEvent({
                 title: c.title || titleFromSlug(c.link),
+
                 description: c.desc,
                 url: c.link,
                 image: c.image,
@@ -226,6 +255,7 @@ export async function scrapeAgendaLX(): Promise<Event[]> {
         await hydrateAgendaDetails(events);
         events.forEach((ev) => {
             if (!ev.price) ev.price = 'Check site';
+            if (ev.date && !ev.endDate) applyDefaultDuration(ev, 2);
         });
 
         console.log('[Agenda LX] ' + events.length + ' events (Playwright)');

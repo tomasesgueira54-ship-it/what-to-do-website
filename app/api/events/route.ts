@@ -1,9 +1,64 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import crypto from "crypto";
 import { Event, MusicGenre, EventCategory } from "@/data/types";
+import { dedupeEvents, getAllEventsCached, isUpcoming } from "@/lib/server/events-store";
+import { recordEventsPerf } from "@/lib/server/events-perf";
 
 export const revalidate = 3600;
+export const dynamic = "force-dynamic";
+
+const QUERY_CACHE_TTL_MS = 30_000;
+const QUERY_CACHE_MAX_ENTRIES = 200;
+
+type QueryCacheEntry = {
+    cachedAt: number;
+    payload: Event[];
+    etag: string;
+};
+
+const queryResultCache = new Map<string, QueryCacheEntry>();
+
+function pruneQueryCache(now: number): void {
+    for (const [key, entry] of queryResultCache) {
+        if (now - entry.cachedAt >= QUERY_CACHE_TTL_MS) {
+            queryResultCache.delete(key);
+        }
+    }
+
+    if (queryResultCache.size <= QUERY_CACHE_MAX_ENTRIES) return;
+
+    const entriesByAge = [...queryResultCache.entries()].sort(
+        (first, second) => first[1].cachedAt - second[1].cachedAt,
+    );
+    const overflow = queryResultCache.size - QUERY_CACHE_MAX_ENTRIES;
+    for (let index = 0; index < overflow; index += 1) {
+        const oldestKey = entriesByAge[index]?.[0];
+        if (!oldestKey) break;
+        queryResultCache.delete(oldestKey);
+    }
+}
+
+function buildEtag(payload: unknown): string {
+    const hash = crypto
+        .createHash("sha1")
+        .update(JSON.stringify(payload))
+        .digest("hex");
+    return `W/\"${hash}\"`;
+}
+
+function formatDurationMs(startNs: bigint): number {
+    return Number(process.hrtime.bigint() - startNs) / 1_000_000;
+}
+
+function buildServerTiming(parts: Array<{ name: string; duration: number }>): string {
+    return parts
+        .map((part) => `${part.name};dur=${part.duration.toFixed(2)}`)
+        .join(", ");
+}
+
+function hashQueryKey(input: string): string {
+    return crypto.createHash("sha1").update(input).digest("hex").slice(0, 12);
+}
 
 /**
  * GET /api/events
@@ -20,27 +75,99 @@ export const revalidate = 3600;
  * /api/events?search=fado&category=Música&sort=date&limit=20
  */
 export async function GET(request: NextRequest) {
+    const reqStart = process.hrtime.bigint();
     try {
-        const filePath = path.join(process.cwd(), "data", "events.json");
-        const fileContent = fs.readFileSync(filePath, "utf-8");
-        const rawEvents: Event[] = JSON.parse(fileContent);
-
         const searchParams = request.nextUrl.searchParams;
         const search = searchParams.get("search")?.toLowerCase() || "";
         const category = searchParams.get("category") || "";
         const genre = searchParams.get("genre") || "";
-        const location = searchParams.get("location") || "";
-        const sort = searchParams.get("sort") || "date";
+        const location = searchParams.get("location")?.toLowerCase() || "";
+        const sortParam = searchParams.get("sort") || "date";
         const onlyFree = searchParams.get("free") === "true";
-        const minPrice = parseFloat(searchParams.get("minPrice") || "0");
-        const maxPrice = parseFloat(searchParams.get("maxPrice") || "" + Infinity);
+        const minPriceParam = Number.parseFloat(searchParams.get("minPrice") || "0");
+        const maxPriceParam = Number.parseFloat(searchParams.get("maxPrice") || "");
         const includePast = searchParams.get("includePast") === "true";
-        const limit = Math.min(parseInt(searchParams.get("limit") || "250"), 250);
+        const limitParam = Number.parseInt(searchParams.get("limit") || "250", 10);
+
+        const minPrice = Number.isFinite(minPriceParam) ? Math.max(minPriceParam, 0) : 0;
+        const maxPrice = Number.isFinite(maxPriceParam) ? Math.max(maxPriceParam, minPrice) : Number.POSITIVE_INFINITY;
+        const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 250)) : 250;
+        const sort = ["date", "title", "price"].includes(sortParam) ? sortParam : "date";
+
+        const queryFingerprint = JSON.stringify({
+            search,
+            category,
+            genre,
+            location,
+            sort,
+            onlyFree,
+            minPrice,
+            maxPrice,
+            includePast,
+            limit,
+        });
+        const queryKeyHash = hashQueryKey(queryFingerprint);
+
+        const incomingEtag = request.headers.get("if-none-match");
+        const cached = queryResultCache.get(queryFingerprint);
+        const now = Date.now();
+
+        pruneQueryCache(now);
+
+        if (cached && now - cached.cachedAt < QUERY_CACHE_TTL_MS) {
+            const totalDuration = formatDurationMs(reqStart);
+            const serverTiming = buildServerTiming([
+                { name: "events-query-cache", duration: 0.01 },
+                { name: "events-total", duration: totalDuration },
+            ]);
+
+            recordEventsPerf({
+                durationMs: totalDuration,
+                readMs: 0,
+                filterMs: 0,
+                sortMs: 0,
+                totalCandidates: cached.payload.length,
+                resultCount: cached.payload.length,
+                payloadBytes: Buffer.byteLength(JSON.stringify(cached.payload)),
+                cache: "HIT",
+                status: incomingEtag && incomingEtag === cached.etag ? 304 : 200,
+                queryKeyHash,
+            });
+
+            if (incomingEtag && incomingEtag === cached.etag) {
+                return new NextResponse(null, {
+                    status: 304,
+                    headers: {
+                        ETag: cached.etag,
+                        "Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=86400",
+                        Vary: "Accept-Encoding",
+                        "Server-Timing": serverTiming,
+                        "X-Events-Query-Cache": "HIT",
+                    },
+                });
+            }
+
+            return NextResponse.json(cached.payload, {
+                headers: {
+                    ETag: cached.etag,
+                    "Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=86400",
+                    Vary: "Accept-Encoding",
+                    "Server-Timing": serverTiming,
+                    "X-Events-Query-Cache": "HIT",
+                    "X-Events-Count": String(cached.payload.length),
+                },
+            });
+        }
+
+        const readStart = process.hrtime.bigint();
+        const rawEvents = await getAllEventsCached();
+        const readDuration = formatDurationMs(readStart);
 
         // Normalize + dedupe first
         const deduped = dedupeEvents(rawEvents)
             .filter((event) => (includePast ? true : isUpcoming(event)));
 
+        const filterStart = process.hrtime.bigint();
         let filtered = deduped.filter((event) => {
             const priceValue = normalizePrice(event.price).value;
             const derivedCategory = event.category || detectCategory(event);
@@ -53,7 +180,7 @@ export async function GET(request: NextRequest) {
 
             if (category && derivedCategory !== category) return false;
             if (genre && derivedGenre !== genre) return false;
-            if (location && !event.location?.toLowerCase().includes(location.toLowerCase())) return false;
+            if (location && !event.location?.toLowerCase().includes(location)) return false;
 
             if (onlyFree && priceValue !== 0) return false;
             if (priceValue < minPrice) return false;
@@ -61,7 +188,9 @@ export async function GET(request: NextRequest) {
 
             return true;
         });
+        const filterDuration = formatDurationMs(filterStart);
 
+        const sortStart = process.hrtime.bigint();
         filtered.sort((a, b): number => {
             switch (sort) {
                 case "title":
@@ -76,16 +205,76 @@ export async function GET(request: NextRequest) {
                     return new Date(a.date).getTime() - new Date(b.date).getTime();
             }
         });
+        const sortDuration = formatDurationMs(sortStart);
 
         filtered = filtered.slice(0, limit);
 
+        const etag = buildEtag(filtered);
+        queryResultCache.set(queryFingerprint, {
+            cachedAt: now,
+            payload: filtered,
+            etag,
+        });
+
+        const serverTiming = buildServerTiming([
+            { name: "events-read", duration: readDuration },
+            { name: "events-filter", duration: filterDuration },
+            { name: "events-sort", duration: sortDuration },
+            { name: "events-total", duration: formatDurationMs(reqStart) },
+        ]);
+        const totalDuration = formatDurationMs(reqStart);
+        const payloadBytes = Buffer.byteLength(JSON.stringify(filtered));
+
+        recordEventsPerf({
+            durationMs: totalDuration,
+            readMs: readDuration,
+            filterMs: filterDuration,
+            sortMs: sortDuration,
+            totalCandidates: deduped.length,
+            resultCount: filtered.length,
+            payloadBytes,
+            cache: "MISS",
+            status: incomingEtag && incomingEtag === etag ? 304 : 200,
+            queryKeyHash,
+        });
+
+        if (incomingEtag && incomingEtag === etag) {
+            return new NextResponse(null, {
+                status: 304,
+                headers: {
+                    ETag: etag,
+                    "Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=86400",
+                    Vary: "Accept-Encoding",
+                    "Server-Timing": serverTiming,
+                    "X-Events-Query-Cache": "MISS",
+                },
+            });
+        }
+
         return NextResponse.json(filtered, {
             headers: {
-                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+                ETag: etag,
+                "Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=86400",
+                Vary: "Accept-Encoding",
+                "Server-Timing": serverTiming,
+                "X-Events-Query-Cache": "MISS",
+                "X-Events-Count": String(filtered.length),
             },
         });
     } catch (error) {
         console.error("Error fetching events:", error);
+        recordEventsPerf({
+            durationMs: formatDurationMs(reqStart),
+            readMs: 0,
+            filterMs: 0,
+            sortMs: 0,
+            totalCandidates: 0,
+            resultCount: 0,
+            payloadBytes: 0,
+            cache: "MISS",
+            status: 500,
+            queryKeyHash: "error",
+        });
         return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
     }
 }
@@ -108,29 +297,6 @@ function normalizePrice(price?: string): { value: number; label: string } {
     }
 
     return { value: Infinity, label: price || "Preço indisponível" };
-}
-
-function isUpcoming(event: Event): boolean {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOrStart = event.endDate ? new Date(event.endDate) : new Date(event.date);
-    return endOrStart >= today;
-}
-
-function dedupeEvents(events: Event[]): Event[] {
-    const seen = new Set<string>();
-    const result: Event[] = [];
-
-    for (const ev of events) {
-        const key = (ev.url || "") || `${ev.title}-${ev.date}`;
-        const altKey = `${ev.title}-${ev.date}`;
-        if (seen.has(key) || seen.has(altKey)) continue;
-        seen.add(key);
-        seen.add(altKey);
-        result.push(ev);
-    }
-
-    return result;
 }
 
 function detectCategory(event: Event): EventCategory {

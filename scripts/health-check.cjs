@@ -2,6 +2,7 @@
 /**
  * Health check orchestrator
  * - Runs `npm run quality:events` (data quality + subtitle semantic checks)
+ * - Runs `npm run budget:perf` (payload budget guard)
  * - Runs `npm run build` (sanity)
  * - Runs site audit (scripts/audit-links-playwright.cjs)
  * - Runs subscribe form test (scripts/playwright-subscribe-test.cjs)
@@ -11,6 +12,7 @@
  */
 const { spawn } = require('child_process');
 const http = require('http');
+const HEALTH_AUDIT_RETRIES = Number(process.env.HEALTH_AUDIT_RETRIES || 1);
 
 function run(cmd, args, opts = {}) {
     return new Promise((resolve) => {
@@ -43,6 +45,19 @@ async function waitForServer(url, maxAttempts = 30, delayMs = 1000) {
     return false;
 }
 
+async function runWithRetries(cmd, args, retries, opts = {}) {
+    let lastCode = 1;
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+        lastCode = await run(cmd, args, opts);
+        if (lastCode === 0) return 0;
+        if (attempt < retries) {
+            console.warn(`Step failed with code ${lastCode}. Retrying (${attempt + 1}/${retries})...`);
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
+    }
+    return lastCode;
+}
+
 (async function main() {
     const envBase = process.env.BASE_URL;
     let base = envBase || 'http://localhost:3000';
@@ -64,7 +79,10 @@ async function waitForServer(url, maxAttempts = 30, delayMs = 1000) {
     console.log('\n1) Running events quality gate (coverage + semantic subtitle checks)');
     results.push({ name: 'quality:events', code: await run('npm', ['run', 'quality:events']) });
 
-    console.log('\n2) Running build (next build)');
+    console.log('\n2) Running perf payload budget checks');
+    results.push({ name: 'budget:perf', code: await run('npm', ['run', 'budget:perf']) });
+
+    console.log('\n3) Running build (next build)');
     results.push({ name: 'build', code: await run('npm', ['run', 'build']) });
 
     let runtimeBase = base;
@@ -87,13 +105,13 @@ async function waitForServer(url, maxAttempts = 30, delayMs = 1000) {
         runtimeBase = managedBase;
     }
 
-    console.log('\n3) Running site audit (Playwright crawl)');
-    results.push({ name: 'audit', code: await run('node', ['scripts/audit-links-playwright.cjs'], { env: { ...process.env, BASE_URL: runtimeBase, MAX_PAGES: process.env.MAX_PAGES || '500', EVENT_SEED_COUNT: process.env.EVENT_SEED_COUNT || '200' } }) });
+    console.log('\n4) Running site audit (Playwright crawl)');
+    results.push({ name: 'audit', code: await runWithRetries('node', ['scripts/audit-links-playwright.cjs'], HEALTH_AUDIT_RETRIES, { env: { ...process.env, BASE_URL: runtimeBase, MAX_PAGES: process.env.MAX_PAGES || '500', EVENT_SEED_COUNT: process.env.EVENT_SEED_COUNT || '200' } }) });
 
-    console.log('\n4) Running subscribe form test (Playwright)');
+    console.log('\n5) Running subscribe form test (Playwright)');
     results.push({ name: 'subscribe-test', code: await run('node', ['scripts/playwright-subscribe-test.cjs'], { env: { ...process.env, BASE_URL: runtimeBase } }) });
 
-    console.log('\n5) Running image optimizer checks');
+    console.log('\n6) Running image optimizer checks');
     results.push({ name: 'image-opt', code: await run('node', ['scripts/check-image-opt.cjs'], { env: { ...process.env, BASE_URL: runtimeBase } }) });
 
     console.log('\nSummary:');

@@ -21,6 +21,9 @@ export async function generateMetadata({
     : defaultLocale;
   const episode = richEpisodesMap[id];
   if (!episode) return {};
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://what-to-do.vercel.app";
+  const defaultOgImage = `${siteUrl}/podcasts/images/podcast-banner.png`;
 
   return {
     title: `${episode.title} — What To Do Podcast`,
@@ -29,6 +32,13 @@ export async function generateMetadata({
       title: episode.title,
       description: episode.description,
       type: "website",
+      images: [{ url: defaultOgImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: episode.title,
+      description: episode.description,
+      images: [defaultOgImage],
     },
   };
 }

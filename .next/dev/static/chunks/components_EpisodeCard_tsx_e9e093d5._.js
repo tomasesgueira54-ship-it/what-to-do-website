@@ -24,7 +24,6 @@ function EpisodeCard({ episode, locale = "pt" }) {
     const labels = {
         nowPlaying: locale === "pt" ? "A TOCAR AGORA..." : "PLAYING NOW...",
         paused: locale === "pt" ? "PAUSADO" : "PAUSED",
-        minutesFallback: locale === "pt" ? "?? min" : "?? min",
         audioUnavailable: locale === "pt" ? "Áudio indisponível" : "Audio unavailable"
     };
     // We need an audioUrl to play. If it's missing in props (like in a list view),
@@ -66,24 +65,24 @@ function EpisodeCard({ episode, locale = "pt" }) {
                                 sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 66,
+                                lineNumber: 65,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "absolute inset-0 bg-brand-red/20 group-hover:bg-brand-red/40 transition-all"
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 74,
+                                lineNumber: 73,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "gradient-overlay"
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 75,
+                                lineNumber: 74,
                                 columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            episode.duration && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "absolute bottom-4 left-4 flex items-center space-x-2 text-sm z-10",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaClock"], {
@@ -91,25 +90,25 @@ function EpisodeCard({ episode, locale = "pt" }) {
                                     }, void 0, false, {
                                         fileName: "[project]/components/EpisodeCard.tsx",
                                         lineNumber: 77,
-                                        columnNumber: 13
+                                        columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: episode.duration || labels.minutesFallback
+                                        children: episode.duration
                                     }, void 0, false, {
                                         fileName: "[project]/components/EpisodeCard.tsx",
                                         lineNumber: 78,
-                                        columnNumber: 13
+                                        columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
                                 lineNumber: 76,
-                                columnNumber: 11
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/EpisodeCard.tsx",
-                        lineNumber: 64,
+                        lineNumber: 63,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -122,12 +121,12 @@ function EpisodeCard({ episode, locale = "pt" }) {
                                     children: labels.audioUnavailable
                                 }, void 0, false, {
                                     fileName: "[project]/components/EpisodeCard.tsx",
-                                    lineNumber: 85,
+                                    lineNumber: 86,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 84,
+                                lineNumber: 85,
                                 columnNumber: 13
                             }, this),
                             isCurrent && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -137,28 +136,28 @@ function EpisodeCard({ episode, locale = "pt" }) {
                                     children: isActuallyPlaying ? labels.nowPlaying : labels.paused
                                 }, void 0, false, {
                                     fileName: "[project]/components/EpisodeCard.tsx",
-                                    lineNumber: 92,
+                                    lineNumber: 93,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 91,
+                                lineNumber: 92,
                                 columnNumber: 13
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            episode.publishDate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "text-brand-grey text-sm mb-2",
                                 children: episode.publishDate
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 97,
-                                columnNumber: 11
+                                lineNumber: 99,
+                                columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                 className: "font-display text-xl font-bold mb-2 group-hover:text-brand-red transition-colors",
                                 children: episode.title
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 98,
+                                lineNumber: 103,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -166,19 +165,19 @@ function EpisodeCard({ episode, locale = "pt" }) {
                                 children: episode.description
                             }, void 0, false, {
                                 fileName: "[project]/components/EpisodeCard.tsx",
-                                lineNumber: 101,
+                                lineNumber: 106,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/EpisodeCard.tsx",
-                        lineNumber: 82,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/EpisodeCard.tsx",
-                lineNumber: 63,
+                lineNumber: 62,
                 columnNumber: 7
             }, this),
             hasPlayableAudio && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -191,29 +190,29 @@ function EpisodeCard({ episode, locale = "pt" }) {
                         className: "text-2xl text-white"
                     }, void 0, false, {
                         fileName: "[project]/components/EpisodeCard.tsx",
-                        lineNumber: 125,
+                        lineNumber: 130,
                         columnNumber: 15
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$icons$2f$fa$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FaPlay"], {
                         className: "text-2xl text-white ml-1"
                     }, void 0, false, {
                         fileName: "[project]/components/EpisodeCard.tsx",
-                        lineNumber: 127,
+                        lineNumber: 132,
                         columnNumber: 15
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/EpisodeCard.tsx",
-                    lineNumber: 107,
+                    lineNumber: 112,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/EpisodeCard.tsx",
-                lineNumber: 106,
+                lineNumber: 111,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/EpisodeCard.tsx",
-        lineNumber: 62,
+        lineNumber: 61,
         columnNumber: 5
     }, this);
 }

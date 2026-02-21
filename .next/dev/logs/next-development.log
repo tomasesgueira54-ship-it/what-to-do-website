@@ -1,11 +1,95 @@
-[00:00:01.958] Server  LOG     ✓ Ready in 1478ms
-[00:00:05.214] Server  LOG     ○ Compiling /[locale] ...
-[00:00:07.541] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:07.824] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:15.562] Browser WARN    Playback unavailable for current source
-[00:00:16.633] Browser WARN    Playback unavailable for current source
-[00:00:22.907] Browser WARN    Playback unavailable for current source
-[00:00:24.156] Browser WARN    Playback unavailable for current source
-[00:02:32.854] Server  LOG     ✓ Compiled in 124ms
-[00:03:25.367] Server  LOG     ✓ Compiled in 134ms
-[00:03:32.080] Server  LOG     ✓ Compiled in 145ms
+[00:00:02.648] Server  LOG     ✓ Ready in 2s
+[00:00:19.226] Server  LOG     ○ Compiling /[locale] ...
+[00:00:22.437] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:22.876] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ErrorBoundaryHandler pathname="/pt" errorComponent={function GlobalError} errorStyles={<SegmentViewNode>} ...>
+      <LoadingBoundary name="/" loading={[...]}>
+        <Suspense name="/" fallback={<Fragment>}>
+          <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+            <HTTPAccessFallbackErrorBoundary pathname="/pt" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/pt" tree={[...]} params={{locale:"pt"}} cacheNode={{...}} segmentPath={[...]} ...>
+                    <SegmentViewNode type="layout" pagePath="[locale]/l...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <div lang="pt" className="inter_c15e...">
+                          <script>
+                          <a>
+                          <Header>
+                          <main>
+                          <AnalyticsTracker>
+                          <footer>
+                          <StickyPlayer>
+                          <CookieConsent locale="pt">
++                           <div className="fixed bottom-4 left-4 right-4 z-[90] md:left-6 md:right-6">
+                  ...
+
+[00:01:06.690] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:07.119] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ErrorBoundaryHandler pathname="/pt" errorComponent={function GlobalError} errorStyles={<SegmentViewNode>} ...>
+      <LoadingBoundary name="/" loading={[...]}>
+        <Suspense name="/" fallback={<Fragment>}>
+          <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+            <HTTPAccessFallbackErrorBoundary pathname="/pt" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <InnerLayoutRouter url="/pt#subscribe" tree={[...]} params={{locale:"pt"}} cacheNode={{...}} ...>
+                    <SegmentViewNode type="layout" pagePath="[locale]/l...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <div lang="pt" className="inter_c15e...">
+                          <script>
+                          <a>
+                          <Header>
+                          <main>
+                          <AnalyticsTracker>
+                          <footer>
+                          <StickyPlayer>
+                          <CookieConsent locale="pt">
++                           <div className="fixed bottom-4 left-4 right-4 z-[90] md:left-6 md:right-6">
+                  ...
+
+[14:07:41.092] Server  LOG     ✓ Compiled in 150ms

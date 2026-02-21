@@ -6,6 +6,40 @@ import {
     type DashboardExportLead,
 } from "@/lib/server/analytics-store";
 
+function isAuthorized(request: NextRequest, url: URL): boolean {
+    const expectedUser = process.env.PARTNERS_DASHBOARD_USER;
+    const expectedPassword = process.env.PARTNERS_DASHBOARD_PASSWORD;
+    const expectedToken = process.env.PARTNERS_DASHBOARD_TOKEN;
+    const hasBasicAuthConfig = Boolean(expectedUser && expectedPassword);
+    const hasTokenConfig = Boolean(expectedToken);
+
+    if (hasBasicAuthConfig) {
+        const auth = request.headers.get("authorization");
+        if (auth && auth.startsWith("Basic ")) {
+            try {
+                const encoded = auth.slice("Basic ".length).trim();
+                const decoded = Buffer.from(encoded, "base64").toString("utf-8");
+                const separator = decoded.indexOf(":");
+                if (separator >= 0) {
+                    const user = decoded.slice(0, separator);
+                    const password = decoded.slice(separator + 1);
+                    if (user === expectedUser && password === expectedPassword) {
+                        return true;
+                    }
+                }
+            } catch {
+                return false;
+            }
+        }
+    }
+
+    if (hasTokenConfig && url.searchParams.get("token") === expectedToken) {
+        return true;
+    }
+
+    return false;
+}
+
 function parseDays(value: string | null): number {
     if (!value) return 30;
     const parsed = Number(value);
@@ -39,20 +73,20 @@ function toCsv<T extends Record<string, unknown>>(rows: T[]): string {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const url = new URL(request.url);
-    const token = url.searchParams.get("token");
     const kind = url.searchParams.get("kind") || "leads";
     const days = parseDays(url.searchParams.get("days"));
     const source = url.searchParams.get("source") || undefined;
     const eventId = url.searchParams.get("eventId") || undefined;
 
-    const expectedToken = process.env.PARTNERS_DASHBOARD_TOKEN;
-    const requiresToken = Boolean(expectedToken);
-    const isAuthorized = !requiresToken || token === expectedToken;
-
-    if (!isAuthorized) {
+    if (!isAuthorized(request, url)) {
         return NextResponse.json(
             { success: false, error: "Unauthorized" },
-            { status: 401 },
+            {
+                status: 401,
+                headers: {
+                    "WWW-Authenticate": 'Basic realm="What To Do Partners Dashboard"',
+                },
+            },
         );
     }
 

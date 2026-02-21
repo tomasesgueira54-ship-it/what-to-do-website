@@ -20,6 +20,8 @@ export default async function PartnersPage({
     return typeof current === "string" ? current : fallback;
   };
 
+  const showDashboardLink = process.env.SHOW_PARTNER_DASHBOARD === "true";
+
   return (
     <div className="min-h-screen bg-brand-black py-12">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -33,7 +35,7 @@ export default async function PartnersPage({
           )}
         </p>
 
-        {process.env.SHOW_PARTNER_DASHBOARD === "true" && (
+        {showDashboardLink && (
           <div className="mb-8">
             <Link
               href={`/${locale}/partners/dashboard`}
