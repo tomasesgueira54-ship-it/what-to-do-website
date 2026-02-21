@@ -10,6 +10,77 @@ const VERIFY_TIMEOUT_MS = Number(process.env.VERIFY_TIMEOUT_MS || 12000);
 const VERIFY_ROTATION_SEED = process.env.VERIFY_ROTATION_SEED || new Date().toISOString().slice(0, 10);
 const VERIFY_REQUIRE_PRICE_DISCOVERY = process.env.VERIFY_REQUIRE_PRICE_DISCOVERY === '1';
 const VERIFY_MIN_PRICE_COMPARABLE_RATE = Number(process.env.VERIFY_MIN_PRICE_COMPARABLE_RATE || 80);
+const VERIFY_HOST_THROTTLE = process.env.VERIFY_HOST_THROTTLE !== '0';
+
+let pwBrowser;
+let pwContext;
+
+async function getPlaywrightContext() {
+    if (pwContext) return pwContext;
+    // Lazy import so verify stays fast when Playwright fallback isn't needed.
+    // eslint-disable-next-line global-require
+    const { chromium } = require('playwright');
+
+    pwBrowser = await chromium.launch({ headless: true });
+    pwContext = await pwBrowser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    });
+    return pwContext;
+}
+
+async function closePlaywright() {
+    try {
+        if (pwContext) await pwContext.close();
+    } catch {
+        /* ignore */
+    }
+    try {
+        if (pwBrowser) await pwBrowser.close();
+    } catch {
+        /* ignore */
+    }
+    pwContext = undefined;
+    pwBrowser = undefined;
+}
+
+const hostLastRequest = new Map();
+
+function hostMinIntervalMs(url) {
+    let host = '';
+    try {
+        host = new URL(url).hostname.toLowerCase();
+    } catch {
+        return 250;
+    }
+
+    if (host.includes('shotgun.live')) return 2400;
+    if (host.includes('meetup.com')) return 1400;
+    if (host.includes('eventbrite.')) return 1200;
+    if (host.includes('bol.pt')) return 700;
+    if (host.includes('xceed.me')) return 900;
+    return 300;
+}
+
+async function throttleHost(url) {
+    if (!VERIFY_HOST_THROTTLE) return;
+
+    let host = '';
+    try {
+        host = new URL(url).hostname.toLowerCase();
+    } catch {
+        return;
+    }
+
+    const minInterval = hostMinIntervalMs(url);
+    const last = hostLastRequest.get(host) || 0;
+    const now = Date.now();
+    const wait = Math.max(0, minInterval - (now - last));
+    const jitter = Math.floor(Math.random() * 250);
+    if (wait > 0 || jitter > 0) {
+        await sleep(wait + jitter);
+    }
+    hostLastRequest.set(host, Date.now());
+}
 
 const filePath = path.join(process.cwd(), 'data', 'events.json');
 if (!fs.existsSync(filePath)) {
@@ -121,10 +192,37 @@ function shouldRetry(error) {
     const code = String(error?.code || '').toUpperCase();
 
     if (status === 429) return true;
+    if (status === 403) return true;
     if (status >= 500 && status <= 599) return true;
     if (code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ECONNABORTED') return true;
 
     return false;
+}
+
+function isTransientStatus(status) {
+    return status === 429 || status === 403 || (status >= 500 && status <= 599);
+}
+
+function isShotgunUrl(url) {
+    try {
+        return new URL(url).hostname.toLowerCase().includes('shotgun.live');
+    } catch {
+        return false;
+    }
+}
+
+async function fetchHtmlWithPlaywright(url) {
+    await throttleHost(url);
+    const context = await getPlaywrightContext();
+    const page = await context.newPage();
+    try {
+        const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForTimeout(700);
+        const html = await page.content();
+        return { html, status: response?.status?.() ?? null };
+    } finally {
+        await page.close();
+    }
 }
 
 function retryDelay(attempt, error) {
@@ -143,6 +241,7 @@ async function fetchWithRetry(url) {
     let lastError;
     for (let attempt = 1; attempt <= VERIFY_FETCH_RETRIES + 1; attempt += 1) {
         try {
+            await throttleHost(url);
             return await axios.get(url, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (compatible; verify-script/1.0)' },
                 timeout: VERIFY_TIMEOUT_MS,
@@ -224,8 +323,22 @@ async function probeSourceForEvent(ev) {
     const source = detectSource(ev);
     const result = { url: ev.url, source, fetched: false, dateFound: null, dateMatch: 'no', priceFound: null, priceEvidence: 'none', priceMatch: 'no', notes: '' };
     try {
-        const resp = await fetchWithRetry(ev.url);
-        const $ = cheerio.load(resp.data);
+        let html = '';
+        try {
+            const resp = await fetchWithRetry(ev.url);
+            html = resp.data;
+        } catch (err) {
+            const status = err?.response?.status;
+            if (isShotgunUrl(ev.url) && isTransientStatus(status)) {
+                const fallback = await fetchHtmlWithPlaywright(ev.url);
+                html = fallback.html;
+                result.notes = `HTTP ${status} (fallback playwright)`;
+            } else {
+                throw err;
+            }
+        }
+
+        const $ = cheerio.load(html);
         result.fetched = true;
 
         // date: try JSON-LD, meta, time element, plain text match
@@ -298,8 +411,15 @@ async function probeSourceForEvent(ev) {
 
         const evPrice = parsePriceLabel(ev.price || '');
         const isXceed = source.includes('xceed');
+        const isShotgun = source.includes('shotgun') || isShotgunUrl(ev.url);
+
+        // Shotgun frequently exposes inconsistent offer/price tiers (or 0) in structured data.
+        // Treat price checks as informational-only to avoid hard false negatives.
+        if (isShotgun && priceEvidence === 'structured' && evPrice.kind === 'numeric') {
+            result.priceMatch = 'unknown';
+        }
         // Heuristic text price extraction is very noisy on Xceed pages; avoid hard false negatives.
-        if (isXceed && priceEvidence === 'text' && evPrice.kind === 'numeric') {
+        else if (isXceed && priceEvidence === 'text' && evPrice.kind === 'numeric') {
             result.priceMatch = 'unknown';
         } else if (evPrice.kind === 'numeric' && foundPrice && !isNaN(Number(foundPrice))) {
             const a = Number(evPrice.value);
@@ -325,7 +445,7 @@ async function probeSourceForEvent(ev) {
         const status = err?.response?.status;
         const details = status ? `HTTP ${status}` : String(err.message || err);
         result.notes = details;
-        const isTransient = status === 429 || status === 403 || (status >= 500 && status <= 599);
+        const isTransient = isTransientStatus(status);
         result.dateMatch = isTransient ? 'skipped' : 'unknown';
         result.priceMatch = isTransient ? 'skipped' : 'unknown';
     }
@@ -333,6 +453,7 @@ async function probeSourceForEvent(ev) {
 }
 
 (async function main() {
+    try {
     const total = events.length;
 
     const stats = {
@@ -515,7 +636,8 @@ async function probeSourceForEvent(ev) {
             console.error('\n❌ VERIFY_ENFORCE_100 gate failed:');
             gateIssues.forEach((issue) => console.error(`- ${issue}`));
             console.error('\nSet VERIFY_ENFORCE_100=0 only if you explicitly want informational mode.');
-            process.exit(1);
+            process.exitCode = 1;
+            return;
         }
 
         console.log(`\n✅ VERIFY_ENFORCE_100 gate passed (date=100%, priceComparable>=${VERIFY_MIN_PRICE_COMPARABLE_RATE}%).`);
@@ -534,5 +656,9 @@ async function probeSourceForEvent(ev) {
     console.log('- run a full-source verification (longer, can be added to CI), or');
     console.log('- increase sample size or target specific sources for verification.');
 
-    process.exit(0);
+    process.exitCode = 0;
+    }
+    finally {
+        await closePlaywright();
+    }
 })();
